@@ -18,6 +18,8 @@ export default function ControlPanel() {
   const stateDataError = useSiteStore((s) => s.stateDataError)
   const transmissionVisible = useSiteStore((s) => s.transmissionVisible)
   const toggleTransmission = useSiteStore((s) => s.toggleTransmission)
+  const floodVisible = useSiteStore((s) => s.floodVisible)
+  const toggleFlood = useSiteStore((s) => s.toggleFlood)
 
   // In local and site modes the metric selector drives the H3 surface.
   const mode = getMapMode(zoom)
@@ -100,6 +102,22 @@ export default function ControlPanel() {
             aria-checked={transmissionVisible}
             aria-label="Toggle transmission lines"
             onClick={toggleTransmission}
+          >
+            <span className="toggle__thumb" />
+          </button>
+        </div>
+        <div className="toggle-row">
+          <div>
+            <div className="toggle-row__label">Flood Hazard</div>
+            <div className="toggle-row__sub">FEMA NFHL · real data · local zoom</div>
+          </div>
+          <button
+            type="button"
+            className={`toggle${floodVisible ? ' toggle--on' : ''}`}
+            role="switch"
+            aria-checked={floodVisible}
+            aria-label="Toggle FEMA flood hazard zones"
+            onClick={toggleFlood}
           >
             <span className="toggle__thumb" />
           </button>

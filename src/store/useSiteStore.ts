@@ -18,6 +18,20 @@ import {
   fetchTransmissionForState,
   type TransmissionGeo,
 } from '../lib/transmission'
+import {
+  assessFloodRisk,
+  assessFloodRiskLocal,
+  loadFloodZones,
+  type FloodAssessment,
+  type FloodConstraint,
+  type FloodGeo,
+} from '../lib/flood'
+import {
+  boundsContainBounds,
+  boundsContainPoint,
+  expandBounds,
+  type LngLatBounds,
+} from '../lib/geo'
 
 export type BasemapId = 'satellite' | 'clean'
 
@@ -91,6 +105,22 @@ interface SiteStore {
   transmissionByState: Record<string, TransmissionGeo | 'missing'>
   loadTransmissionFor: (usps: string) => Promise<void>
 
+  /** REAL FEMA NFHL flood hazard zones, fetched live per viewport area. */
+  floodVisible: boolean
+  toggleFlood: () => void
+  floodZones: { bounds: LngLatBounds; fc: FloodGeo } | null
+  floodZonesLoading: boolean
+  floodError: string | null
+  ensureFloodZones: (view: LngLatBounds) => Promise<void>
+  /** Flood assessment for the current site, keyed by its coordinates. */
+  floodAssessment: {
+    key: string
+    result: FloodAssessment | 'loading'
+  } | null
+  assessSiteFlood: (site: SelectedSite) => Promise<void>
+  /** Hard-constraint preparation (not yet folded into overall scoring). */
+  siteConstraints: { flood: FloodConstraint }
+
   /** Raw state geometry (no scores) — source of truth for fitBounds. */
   statesGeo: StatesGeo | null
   /** Score lookup by USPS code, loaded separately from geometry. */
@@ -147,6 +177,61 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
 
   analysisRadiusMiles: DEFAULT_RADIUS_MILES,
   setAnalysisRadiusMiles: (analysisRadiusMiles) => set({ analysisRadiusMiles }),
+
+  floodVisible: true,
+  toggleFlood: () => set((prev) => ({ floodVisible: !prev.floodVisible })),
+  floodZones: null,
+  floodZonesLoading: false,
+  floodError: null,
+  ensureFloodZones: async (view) => {
+    const current = get().floodZones
+    if (current && boundsContainBounds(current.bounds, view)) return
+    if (get().floodZonesLoading) return
+    set({ floodZonesLoading: true })
+    try {
+      const bounds = expandBounds(view, 0.5)
+      const fc = await loadFloodZones(bounds)
+      set({ floodZones: { bounds, fc }, floodZonesLoading: false, floodError: null })
+    } catch {
+      // Failed FEMA requests must not break the map — layer just stays empty.
+      set({ floodZonesLoading: false, floodError: 'FEMA flood service unavailable' })
+    }
+  },
+  floodAssessment: null,
+  assessSiteFlood: async (site) => {
+    const key = `${site.latitude.toFixed(5)},${site.longitude.toFixed(5)}`
+    if (get().floodAssessment?.key === key) return
+
+    // Already-loaded polygons covering the point answer synchronously —
+    // no FEMA round-trip for small marker moves inside the cached area.
+    const zones = get().floodZones
+    if (zones && boundsContainPoint(zones.bounds, site.longitude, site.latitude)) {
+      const result = assessFloodRiskLocal(site, zones.fc)
+      set({ floodAssessment: { key, result }, siteConstraints: { flood: result.constraint } })
+      return
+    }
+
+    set({ floodAssessment: { key, result: 'loading' } })
+    try {
+      const result = await assessFloodRisk(site)
+      if (get().floodAssessment?.key !== key) return // site moved meanwhile
+      set({ floodAssessment: { key, result }, siteConstraints: { flood: result.constraint } })
+    } catch {
+      if (get().floodAssessment?.key !== key) return
+      const result: FloodAssessment = {
+        mapped: false,
+        riskLevel: 'unknown',
+        floodZone: null,
+        zoneSubtype: null,
+        sfha: null,
+        constraint: 'unknown',
+        source: 'FEMA NFHL',
+        resolution: 'FEMA query failed / service unavailable',
+      }
+      set({ floodAssessment: { key, result }, siteConstraints: { flood: 'unknown' } })
+    }
+  },
+  siteConstraints: { flood: 'unknown' },
 
   transmissionVisible: true,
   toggleTransmission: () =>
@@ -246,3 +331,9 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
     }
   },
 }))
+
+// Debug handle for development tooling.
+if (typeof window !== 'undefined') {
+  ;(window as unknown as { __siteStore?: typeof useSiteStore }).__siteStore =
+    useSiteStore
+}

@@ -2,6 +2,34 @@ import type { Feature, Geometry, Position } from 'geojson'
 
 export type LngLatBounds = [[number, number], [number, number]]
 
+/** Grows bounds by `factor` of their span on each side. */
+export function expandBounds(
+  [[xmin, ymin], [xmax, ymax]]: LngLatBounds,
+  factor: number,
+): LngLatBounds {
+  const dx = (xmax - xmin) * factor
+  const dy = (ymax - ymin) * factor
+  return [
+    [xmin - dx, ymin - dy],
+    [xmax + dx, ymax + dy],
+  ]
+}
+
+export function boundsContainBounds(
+  [[oxmin, oymin], [oxmax, oymax]]: LngLatBounds,
+  [[ixmin, iymin], [ixmax, iymax]]: LngLatBounds,
+): boolean {
+  return oxmin <= ixmin && oymin <= iymin && oxmax >= ixmax && oymax >= iymax
+}
+
+export function boundsContainPoint(
+  [[xmin, ymin], [xmax, ymax]]: LngLatBounds,
+  lng: number,
+  lat: number,
+): boolean {
+  return lng >= xmin && lng <= xmax && lat >= ymin && lat <= ymax
+}
+
 function walkPositions(
   coords: Position | Position[] | Position[][] | Position[][][],
   visit: (lng: number, lat: number) => void,

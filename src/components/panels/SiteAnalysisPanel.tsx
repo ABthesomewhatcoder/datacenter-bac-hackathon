@@ -1,4 +1,10 @@
+import { useEffect } from 'react'
 import { scoreToColor } from '../../lib/colors'
+import {
+  FLOOD_DATASET,
+  FLOOD_RISK_COLORS,
+  FLOOD_RISK_LABELS,
+} from '../../lib/flood'
 import {
   cellForLocation,
   getCellScore,
@@ -100,6 +106,18 @@ export default function SiteAnalysisPanel() {
   const scoredCounties = useSiteStore((s) => s.scoredCounties)
   const countyViewStateId = useSiteStore((s) => s.countyViewStateId)
   const transmissionByState = useSiteStore((s) => s.transmissionByState)
+  const floodAssessment = useSiteStore((s) => s.floodAssessment)
+  const assessSiteFlood = useSiteStore((s) => s.assessSiteFlood)
+
+  useEffect(() => {
+    if (selectedSite) assessSiteFlood(selectedSite)
+  }, [selectedSite, assessSiteFlood])
+
+  const siteKey = selectedSite
+    ? `${selectedSite.latitude.toFixed(5)},${selectedSite.longitude.toFixed(5)}`
+    : null
+  const flood =
+    siteKey && floodAssessment?.key === siteKey ? floodAssessment.result : null
 
   const transmissionData = countyViewStateId
     ? transmissionByState[countyViewStateId]
@@ -187,8 +205,7 @@ export default function SiteAnalysisPanel() {
                   <span className="mono">
                     {selectedSite.latitude.toFixed(5)},{' '}
                     {selectedSite.longitude.toFixed(5)}
-                  </span>{' '}
-                  · demo data
+                  </span>
                 </div>
               </div>
               <button
@@ -266,17 +283,71 @@ export default function SiteAnalysisPanel() {
                     resolution: 'Regional estimate',
                   },
                   {
-                    label: 'Flood',
-                    value: siteCell?.floodScore ?? null,
-                    resolution: 'Demo local estimate',
-                  },
-                  {
                     label: 'Land',
                     value: siteCell?.landScore ?? null,
                     resolution: 'Demo local estimate',
                   },
                 ]}
               />
+            </div>
+
+            <div>
+              <div className="panel__subheading">Flood Risk</div>
+              {flood === 'loading' || (selectedSite && !flood) ? (
+                <p className="panel__placeholder">Querying FEMA NFHL…</p>
+              ) : flood ? (
+                <>
+                  <div className="site-facts">
+                    <div className="site-fact">
+                      <span>Flood Risk</span>
+                      <span
+                        className="flood-risk"
+                        style={{ color: FLOOD_RISK_COLORS[flood.riskLevel] }}
+                      >
+                        {FLOOD_RISK_LABELS[flood.riskLevel]}
+                      </span>
+                    </div>
+                    {flood.mapped ? (
+                      <>
+                        <div className="site-fact">
+                          <span>FEMA Zone</span>
+                          <span>{flood.floodZone ?? 'Unknown'}</span>
+                        </div>
+                        {flood.zoneSubtype && (
+                          <div className="site-fact">
+                            <span>Zone subtype</span>
+                            <span>{flood.zoneSubtype}</span>
+                          </div>
+                        )}
+                        <div className="site-fact">
+                          <span>Special Flood Hazard Area</span>
+                          <span>{flood.sfha ? 'Yes' : 'No'}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="site-fact">
+                        <span>Coverage</span>
+                        <span>No FEMA data / Unknown</span>
+                      </div>
+                    )}
+                    <div className="site-fact">
+                      <span>Constraint</span>
+                      <span className="mono">{flood.constraint.toUpperCase()}</span>
+                    </div>
+                    <div className="site-fact">
+                      <span>Data resolution</span>
+                      <span>{flood.resolution}</span>
+                    </div>
+                    <div className="site-fact">
+                      <span>Source</span>
+                      <span>
+                        {FLOOD_DATASET.source} · {FLOOD_DATASET.dataStatus}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="state-report__hint">{FLOOD_DATASET.caveat}</p>
+                </>
+              ) : null}
             </div>
 
             <div>
@@ -326,8 +397,8 @@ export default function SiteAnalysisPanel() {
             </div>
 
             <p className="state-report__hint">
-              Regional/local scores are MOCK / DEMO values — transmission
-              proximity is the only real measurement.
+              Regional/local scores are MOCK / DEMO values. Flood risk and
+              transmission proximity are the only REAL measurements here.
             </p>
           </div>
         ) : selectedStateId && (selectedCell || countyScore || stateScore) ? (
