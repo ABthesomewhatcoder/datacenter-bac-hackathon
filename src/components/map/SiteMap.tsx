@@ -21,6 +21,7 @@ import H3SuitabilityLayer, { type H3HoverInfo } from './H3SuitabilityLayer'
 import SiteMarker from './SiteMarker'
 import TransmissionLayer from './TransmissionLayer'
 import FloodLayer from './FloodLayer'
+import FloodDebug from './FloodDebug'
 import AnalysisRadius from './AnalysisRadius'
 import MapTooltip, { scoreRows, type TooltipInfo } from './MapTooltip'
 
@@ -98,6 +99,11 @@ export default function SiteMap() {
     loadStateData()
   }, [loadStateData])
 
+  // Debug handle for development tooling.
+  useEffect(() => {
+    ;(window as unknown as { __map?: MapRef | null }).__map = mapRef.current
+  })
+
   const handleMove = useCallback(
     (evt: ViewStateChangeEvent) => {
       const { longitude, latitude, zoom } = evt.viewState
@@ -111,18 +117,6 @@ export default function SiteMap() {
     (evt: ViewStateChangeEvent) => {
       const { longitude, latitude, zoom } = evt.viewState
       const mode = getMapMode(zoom)
-      if (mode !== 'state' && (mode === 'local' || mode === 'site')) {
-        const store = useSiteStore.getState()
-        if (store.floodVisible) {
-          const b = evt.target.getBounds()
-          if (b) {
-            store.ensureFloodZones([
-              [b.getWest(), b.getSouth()],
-              [b.getEast(), b.getNorth()],
-            ])
-          }
-        }
-      }
       if (mode === 'state' || !statesGeo) return
       const centerState = statesGeo.features.find((f) =>
         featureContains(f, longitude, latitude),
@@ -464,6 +458,7 @@ export default function SiteMap() {
         <CountyLayer />
         <AnalysisRadius />
         <FloodLayer />
+        <FloodDebug />
         <TransmissionLayer />
         <H3SuitabilityLayer
           onHoverCell={handleHoverCell}

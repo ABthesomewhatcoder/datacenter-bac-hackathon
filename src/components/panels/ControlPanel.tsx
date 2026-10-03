@@ -1,4 +1,5 @@
 import { legendGradient, SCORE_STOPS } from '../../lib/colors'
+import { FLOOD_MIN_ZOOM } from '../../lib/flood'
 import { LOCAL_METRICS } from '../../lib/localScoring'
 import { getMapMode } from '../../lib/mapMode'
 import { METRICS } from '../../lib/scoring'
@@ -20,6 +21,8 @@ export default function ControlPanel() {
   const toggleTransmission = useSiteStore((s) => s.toggleTransmission)
   const floodVisible = useSiteStore((s) => s.floodVisible)
   const toggleFlood = useSiteStore((s) => s.toggleFlood)
+  const floodZonesLoading = useSiteStore((s) => s.floodZonesLoading)
+  const floodError = useSiteStore((s) => s.floodError)
 
   // In local and site modes the metric selector drives the H3 surface.
   const mode = getMapMode(zoom)
@@ -122,6 +125,17 @@ export default function ControlPanel() {
             <span className="toggle__thumb" />
           </button>
         </div>
+        {floodVisible && zoom < FLOOD_MIN_ZOOM && (
+          <p className="toggle-status">Zoom in to view FEMA flood hazards</p>
+        )}
+        {floodVisible && floodZonesLoading && (
+          <p className="toggle-status">Loading FEMA flood data…</p>
+        )}
+        {floodVisible && !floodZonesLoading && floodError && (
+          <p className="toggle-status toggle-status--error">
+            FEMA flood data temporarily unavailable
+          </p>
+        )}
       </section>
 
       <section className="panel__section">

@@ -30,11 +30,188 @@
     "WY": {
       "lineCount": 510,
       "generated": "2026-10-03"
+    },
+    "AL": {
+      "lineCount": 2920,
+      "generated": "2026-10-03"
+    },
+    "AR": {
+      "lineCount": 1177,
+      "generated": "2026-10-03"
+    },
+    "CA": {
+      "lineCount": 2135,
+      "generated": "2026-10-03"
+    },
+    "CO": {
+      "lineCount": 1225,
+      "generated": "2026-10-03"
+    },
+    "CT": {
+      "lineCount": 412,
+      "generated": "2026-10-03"
+    },
+    "DC": {
+      "lineCount": 58,
+      "generated": "2026-10-03"
+    },
+    "DE": {
+      "lineCount": 166,
+      "generated": "2026-10-03"
+    },
+    "FL": {
+      "lineCount": 2060,
+      "generated": "2026-10-03"
+    },
+    "GA": {
+      "lineCount": 4224,
+      "generated": "2026-10-03"
+    },
+    "IA": {
+      "lineCount": 666,
+      "generated": "2026-10-03"
+    },
+    "ID": {
+      "lineCount": 1013,
+      "generated": "2026-10-03"
+    },
+    "IL": {
+      "lineCount": 2158,
+      "generated": "2026-10-03"
+    },
+    "IN": {
+      "lineCount": 1601,
+      "generated": "2026-10-03"
+    },
+    "KS": {
+      "lineCount": 858,
+      "generated": "2026-10-03"
+    },
+    "KY": {
+      "lineCount": 1468,
+      "generated": "2026-10-03"
+    },
+    "LA": {
+      "lineCount": 1464,
+      "generated": "2026-10-03"
+    },
+    "MA": {
+      "lineCount": 1201,
+      "generated": "2026-10-03"
+    },
+    "MD": {
+      "lineCount": 1211,
+      "generated": "2026-10-03"
+    },
+    "ME": {
+      "lineCount": 227,
+      "generated": "2026-10-03"
+    },
+    "MI": {
+      "lineCount": 2490,
+      "generated": "2026-10-03"
+    },
+    "MN": {
+      "lineCount": 1333,
+      "generated": "2026-10-03"
+    },
+    "MO": {
+      "lineCount": 1971,
+      "generated": "2026-10-03"
+    },
+    "MS": {
+      "lineCount": 1501,
+      "generated": "2026-10-03"
+    },
+    "MT": {
+      "lineCount": 545,
+      "generated": "2026-10-03"
+    },
+    "NC": {
+      "lineCount": 4833,
+      "generated": "2026-10-03"
+    },
+    "ND": {
+      "lineCount": 685,
+      "generated": "2026-10-03"
+    },
+    "NE": {
+      "lineCount": 743,
+      "generated": "2026-10-03"
+    },
+    "NH": {
+      "lineCount": 250,
+      "generated": "2026-10-03"
+    },
+    "NJ": {
+      "lineCount": 738,
+      "generated": "2026-10-03"
+    },
+    "NM": {
+      "lineCount": 581,
+      "generated": "2026-10-03"
+    },
+    "NV": {
+      "lineCount": 582,
+      "generated": "2026-10-03"
+    },
+    "NY": {
+      "lineCount": 3205,
+      "generated": "2026-10-03"
+    },
+    "OK": {
+      "lineCount": 1921,
+      "generated": "2026-10-03"
+    },
+    "OR": {
+      "lineCount": 2032,
+      "generated": "2026-10-03"
+    },
+    "PA": {
+      "lineCount": 1464,
+      "generated": "2026-10-03"
+    },
+    "RI": {
+      "lineCount": 205,
+      "generated": "2026-10-03"
+    },
+    "SC": {
+      "lineCount": 3084,
+      "generated": "2026-10-03"
+    },
+    "SD": {
+      "lineCount": 372,
+      "generated": "2026-10-03"
+    },
+    "TN": {
+      "lineCount": 1926,
+      "generated": "2026-10-03"
+    },
+    "TX": {
+      "lineCount": 6910,
+      "generated": "2026-10-03"
+    },
+    "UT": {
+      "lineCount": 1024,
+      "generated": "2026-10-03"
+    },
+    "VT": {
+      "lineCount": 202,
+      "generated": "2026-10-03"
+    },
+    "WI": {
+      "lineCount": 990,
+      "generated": "2026-10-03"
+    },
+    "WV": {
+      "lineCount": 1588,
+      "generated": "2026-10-03"
     }
   },
   "references": {
     "catalog": "https://catalog.data.gov/dataset/electric-power-transmission-lines",
     "eiaFaq": "https://www.eia.gov/tools/faqs/faq.php?id=567&t=1",
     "futureEnrichment": "https://data.openei.org/submissions/8742 (Berkeley Lab 2026 harmonized transmission dataset)"
-  }
+  },
+  "coverage": "All 48 contiguous states + DC. Alaska, Hawaii, and territories excluded."
 }

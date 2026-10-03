@@ -17,6 +17,12 @@ export const FLOOD_DATASET = {
     'FEMA flood maps represent mapped regulatory flood hazards and do not capture every source of present or future flood risk.',
 } as const
 
+/**
+ * FEMA 500s on oversized envelope queries, so flood fetch/render only
+ * happens from this zoom (viewport ~40 km) downward in scale.
+ */
+export const FLOOD_MIN_ZOOM = 8.2
+
 const QUERY_URL = `${FLOOD_DATASET.service}/query`
 const OUT_FIELDS = 'FLD_ZONE,ZONE_SUBTY,SFHA_TF,STATIC_BFE,DFIRM_ID,GFID'
 const PAGE_SIZE = 2000
@@ -158,10 +164,19 @@ export async function loadFloodZones(bounds: LngLatBounds): Promise<FloodGeo> {
       resultRecordCount: String(PAGE_SIZE),
       f: 'geojson',
     })
-    const res = await fetch(`${QUERY_URL}?${params}`)
-    if (!res.ok) throw new Error(`FEMA NFHL HTTP ${res.status}`)
-    const fc = (await res.json()) as FloodGeo & { error?: unknown }
-    if (fc.error) throw new Error('FEMA NFHL query error')
+    let fc: (FloodGeo & { error?: unknown }) | null = null
+    try {
+      const res = await fetch(`${QUERY_URL}?${params}`)
+      if (!res.ok) throw new Error(`FEMA NFHL HTTP ${res.status}`)
+      fc = (await res.json()) as FloodGeo & { error?: unknown }
+      if (fc.error) throw new Error('FEMA NFHL query error')
+    } catch (err) {
+      // FEMA 500s under load on heavy queries. A partial result from
+      // earlier pages is far better than nothing; only the first page
+      // failing is a hard failure.
+      if (features.length === 0) throw err
+      break
+    }
     features.push(...fc.features)
     if (fc.features.length < PAGE_SIZE) break
   }

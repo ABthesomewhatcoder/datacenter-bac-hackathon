@@ -386,6 +386,10 @@ export default function SiteAnalysisPanel() {
                     </span>
                   </div>
                 </div>
+              ) : transmissionData === 'missing' ? (
+                <p className="panel__placeholder">
+                  Transmission data unavailable for this state
+                </p>
               ) : (
                 <p className="panel__placeholder">
                   No nearby line in loaded dataset

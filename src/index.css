@@ -717,3 +717,31 @@ body,
 .mapboxgl-ctrl-attrib a {
   color: var(--text-muted) !important;
 }
+
+/* ---------- Toggle status + flood debug (dev) ---------- */
+
+.toggle-status {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--accent);
+}
+
+.toggle-status--error {
+  color: #e8833d;
+}
+
+.flood-debug {
+  position: absolute;
+  bottom: 40px;
+  left: 16px;
+  z-index: 10;
+  padding: 8px 10px;
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  background: rgba(10, 14, 20, 0.88);
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  pointer-events: none;
+}

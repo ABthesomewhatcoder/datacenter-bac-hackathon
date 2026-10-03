@@ -148,6 +148,7 @@ interface SiteStore {
 }
 
 let countyRequestToken = 0
+let pendingFloodView: LngLatBounds | null = null
 
 export const useSiteStore = create<SiteStore>((set, get) => ({
   basemap: 'satellite',
@@ -186,16 +187,31 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
   ensureFloodZones: async (view) => {
     const current = get().floodZones
     if (current && boundsContainBounds(current.bounds, view)) return
-    if (get().floodZonesLoading) return
+    if (get().floodZonesLoading) {
+      // Remember the latest wanted view instead of silently dropping it.
+      pendingFloodView = view
+      return
+    }
     set({ floodZonesLoading: true })
     try {
-      const bounds = expandBounds(view, 0.5)
-      const fc = await loadFloodZones(bounds)
+      // Modest expansion keeps the envelope within what FEMA reliably
+      // serves; on failure retry once with the exact viewport.
+      let bounds = expandBounds(view, 0.25)
+      let fc: FloodGeo
+      try {
+        fc = await loadFloodZones(bounds)
+      } catch {
+        bounds = view
+        fc = await loadFloodZones(bounds)
+      }
       set({ floodZones: { bounds, fc }, floodZonesLoading: false, floodError: null })
     } catch {
       // Failed FEMA requests must not break the map — layer just stays empty.
       set({ floodZonesLoading: false, floodError: 'FEMA flood service unavailable' })
     }
+    const queued = pendingFloodView
+    pendingFloodView = null
+    if (queued) get().ensureFloodZones(queued)
   },
   floodAssessment: null,
   assessSiteFlood: async (site) => {

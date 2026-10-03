@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Layer, Source, useMap } from 'react-map-gl/mapbox'
 import type { ExpressionSpecification } from 'mapbox-gl'
-import { getMapMode, MODE_THRESHOLDS } from '../../lib/mapMode'
+import { FLOOD_MIN_ZOOM } from '../../lib/flood'
 import { useSiteStore } from '../../store/useSiteStore'
 
 const SUBTYPE: ExpressionSpecification = [
@@ -51,25 +51,67 @@ export default function FloodLayer() {
   const ensureFloodZones = useSiteStore((s) => s.ensureFloodZones)
   const zoom = useSiteStore((s) => s.viewState.zoom)
 
-  // Fetch when the toggle turns on while already at local/site zoom.
+  // Fetch whenever flood becomes active: toggle flipped on past the
+  // minimum zoom, OR zoom crosses the threshold while the toggle is on.
+  // `active` flips discretely, so this fires exactly on entry regardless
+  // of whether the camera moved by gesture or code; moveEnd in SiteMap
+  // covers pans/zooms past that point.
+  // Raw mapbox moveend fires for ALL camera changes (gestures, flyTo,
+  // and controlled prop jumps alike) — unlike react-map-gl's onMoveEnd
+  // prop, which skips prop-initiated moves.
   useEffect(() => {
-    if (!visible || !map) return
-    if (getMapMode(zoom) === 'state' || getMapMode(zoom) === 'county') return
-    const b = map.getBounds()
-    if (b) {
-      ensureFloodZones([
-        [b.getWest(), b.getSouth()],
-        [b.getEast(), b.getNorth()],
-      ])
+    if (!map) return
+    const onMoveEnd = () => {
+      const s = useSiteStore.getState()
+      if (!s.floodVisible) return
+      if ((map.getZoom?.() ?? 0) < FLOOD_MIN_ZOOM) return
+      const b = map.getBounds()
+      if (b) {
+        s.ensureFloodZones([
+          [b.getWest(), b.getSouth()],
+          [b.getEast(), b.getNorth()],
+        ])
+      }
     }
-    // Intentionally not re-running per zoom frame; moveEnd in SiteMap
-    // handles pans/zooms.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, map, ensureFloodZones])
+    map.on('moveend', onMoveEnd)
+    return () => {
+      map.off('moveend', onMoveEnd)
+    }
+  }, [map])
+
+  const active = visible && zoom >= FLOOD_MIN_ZOOM
+  useEffect(() => {
+    if (!active || !map) return
+    let cancelled = false
+    // Read bounds only after the camera settles — reading synchronously
+    // races a just-issued camera jump and can query a continent-sized
+    // envelope, which FEMA rejects with HTTP 500.
+    const read = () => {
+      if (cancelled) return
+      const b = map.getBounds()
+      if (b) {
+        ensureFloodZones([
+          [b.getWest(), b.getSouth()],
+          [b.getEast(), b.getNorth()],
+        ])
+      }
+    }
+    let timer: ReturnType<typeof setTimeout> | undefined
+    if (map.isMoving()) {
+      map.once('moveend', read)
+    } else {
+      timer = setTimeout(read, 80)
+    }
+    return () => {
+      cancelled = true
+      map.off('moveend', read)
+      if (timer) clearTimeout(timer)
+    }
+  }, [active, map, ensureFloodZones])
 
   if (!visible || !floodZones) return null
 
-  const minzoom = MODE_THRESHOLDS.local - 0.5
+  const minzoom = FLOOD_MIN_ZOOM - 0.2
 
   return (
     <Source id="flood-zones" type="geojson" data={floodZones.fc}>
