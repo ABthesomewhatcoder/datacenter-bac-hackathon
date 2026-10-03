@@ -23,6 +23,45 @@ function walkPositions(
  * spans the ±180 seam, eastern-hemisphere longitudes are shifted by -360 so
  * fitBounds doesn't try to frame the entire globe.
  */
+function ringContains(ring: Position[], lng: number, lat: number): boolean {
+  let inside = false
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i]
+    const [xj, yj] = ring[j]
+    if (
+      yi > lat !== yj > lat &&
+      lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi
+    ) {
+      inside = !inside
+    }
+  }
+  return inside
+}
+
+/** Even-odd point-in-polygon test for Polygon/MultiPolygon features. */
+export function featureContains(
+  feature: Feature<Geometry>,
+  lng: number,
+  lat: number,
+): boolean {
+  const geom = feature.geometry
+  if (geom.type === 'Polygon') {
+    return geom.coordinates.reduce(
+      (inside, ring) => (ringContains(ring, lng, lat) ? !inside : inside),
+      false,
+    )
+  }
+  if (geom.type === 'MultiPolygon') {
+    return geom.coordinates.some((polygon) =>
+      polygon.reduce(
+        (inside, ring) => (ringContains(ring, lng, lat) ? !inside : inside),
+        false,
+      ),
+    )
+  }
+  return false
+}
+
 export function featureBounds(feature: Feature<Geometry>): LngLatBounds {
   let minLng = Infinity
   let minLat = Infinity

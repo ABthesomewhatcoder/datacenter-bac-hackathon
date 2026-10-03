@@ -1,5 +1,6 @@
 import { Layer, Source } from 'react-map-gl/mapbox'
 import { stateFillColor } from '../../lib/colors'
+import { STATE_FADE_RANGE } from '../../lib/mapMode'
 import { useSiteStore } from '../../store/useSiteStore'
 
 export const STATE_SOURCE_ID = 'us-states'
@@ -7,8 +8,10 @@ export const STATE_FILL_LAYER_ID = 'state-fill'
 
 /**
  * Choropleth of state suitability for the active metric. Fill opacity stays
- * ~60% so satellite imagery reads through; hover/selection emphasis comes
- * from feature-state (set in SiteMap) and the selection outline layer.
+ * ~60% at national zoom so satellite imagery reads through, then fades out
+ * across STATE_FADE_RANGE as the county layer fades in. State borders stay
+ * visible at county zoom for context. The fill remains queryable while
+ * transparent, so clicking a neighboring state at county zoom still works.
  */
 export default function StateLayer() {
   const scoredStates = useSiteStore((s) => s.scoredStates)
@@ -16,6 +19,8 @@ export default function StateLayer() {
   const selectedStateId = useSiteStore((s) => s.selectedStateId)
 
   if (!scoredStates) return null
+
+  const [fadeFrom, fadeTo] = STATE_FADE_RANGE
 
   return (
     <Source
@@ -30,10 +35,18 @@ export default function StateLayer() {
         paint={{
           'fill-color': stateFillColor(activeMetric),
           'fill-opacity': [
-            'case',
-            ['boolean', ['feature-state', 'hover'], false],
-            0.78,
-            0.6,
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            fadeFrom,
+            [
+              'case',
+              ['boolean', ['feature-state', 'hover'], false],
+              0.78,
+              0.6,
+            ],
+            fadeTo,
+            0,
           ],
         }}
       />

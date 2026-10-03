@@ -239,6 +239,12 @@ body,
   margin-bottom: 6px;
 }
 
+.map-tooltip__subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: -4px 0 6px;
+}
+
 .map-tooltip__rows {
   margin: 0;
   display: flex;
@@ -277,7 +283,88 @@ body,
   color: var(--text-muted);
 }
 
+/* ---------- Breadcrumb ---------- */
+
+.breadcrumb {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 999px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+}
+
+.breadcrumb__link {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.breadcrumb__link:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb__link:disabled {
+  color: var(--text);
+  cursor: default;
+  text-decoration: none;
+}
+
+.breadcrumb__sep {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.breadcrumb__current {
+  font-size: 12px;
+  font-weight: 600;
+}
+
 /* ---------- State report (right panel) ---------- */
+
+.state-report__parent {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  margin-bottom: 2px;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.state-report__parent:hover {
+  text-decoration: underline;
+}
+
+.state-report__parent::after {
+  content: ' ↓';
+  opacity: 0.7;
+}
+
+.state-report__hint {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
 
 .state-report {
   display: flex;

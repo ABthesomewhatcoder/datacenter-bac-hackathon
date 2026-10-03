@@ -5,6 +5,8 @@ export interface TooltipInfo {
   x: number
   y: number
   name: string
+  /** Secondary line, e.g. the parent state for a county. */
+  subtitle?: string
   score: StateScore | null
 }
 
@@ -22,6 +24,9 @@ export default function MapTooltip({ info }: { info: TooltipInfo }) {
       style={{ transform: `translate(${info.x + 14}px, ${info.y + 14}px)` }}
     >
       <div className="map-tooltip__title">{info.name}</div>
+      {info.subtitle && (
+        <div className="map-tooltip__subtitle">{info.subtitle}</div>
+      )}
       {info.score ? (
         <dl className="map-tooltip__rows">
           {ROWS.map(({ key, label }) => (

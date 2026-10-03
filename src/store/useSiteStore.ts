@@ -1,8 +1,14 @@
 import { create } from 'zustand'
 import {
+  fetchCountiesForState,
+  fetchCountyScores,
   fetchStateData,
+  joinCountyScores,
   joinScores,
+  type CountiesGeo,
+  type CountyScoreMap,
   type Metric,
+  type ScoredCountiesGeo,
   type ScoredStatesGeo,
   type StateScoreMap,
   type StatesGeo,
@@ -62,7 +68,22 @@ interface SiteStore {
 
   selectedStateId: string | null
   setSelectedStateId: (id: string | null) => void
+
+  selectedCountyId: string | null
+  setSelectedCountyId: (geoid: string | null) => void
+
+  /** USPS code of the state whose counties are currently displayed. */
+  countyViewStateId: string | null
+  /** Counties of countyViewStateId with scores joined, fed to the map source. */
+  scoredCounties: ScoredCountiesGeo | null
+  /** Raw county geometry cache so revisiting a state doesn't refetch. */
+  countiesCache: Record<string, CountiesGeo>
+  countyScores: CountyScoreMap | null
+  /** Loads (or reuses) a state's counties and makes them the county view. */
+  showCountiesFor: (usps: string | null) => Promise<void>
 }
+
+let countyRequestToken = 0
 
 export const useSiteStore = create<SiteStore>((set, get) => ({
   basemap: 'satellite',
@@ -94,5 +115,48 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
   },
 
   selectedStateId: null,
-  setSelectedStateId: (selectedStateId) => set({ selectedStateId }),
+  setSelectedStateId: (selectedStateId) =>
+    set((prev) => ({
+      selectedStateId,
+      // A county selection only makes sense inside its own state.
+      selectedCountyId:
+        selectedStateId &&
+        prev.selectedCountyId &&
+        prev.countyViewStateId === selectedStateId
+          ? prev.selectedCountyId
+          : null,
+    })),
+
+  selectedCountyId: null,
+  setSelectedCountyId: (selectedCountyId) => set({ selectedCountyId }),
+
+  countyViewStateId: null,
+  scoredCounties: null,
+  countiesCache: {},
+  countyScores: null,
+  showCountiesFor: async (usps) => {
+    const token = ++countyRequestToken
+    if (usps === null) {
+      set({ countyViewStateId: null, scoredCounties: null })
+      return
+    }
+    if (get().countyViewStateId === usps && get().scoredCounties) return
+    try {
+      const scores = get().countyScores ?? (await fetchCountyScores())
+      const cached = get().countiesCache[usps]
+      const geo = cached ?? (await fetchCountiesForState(usps))
+      // A newer request superseded this one while fetching — drop the result.
+      if (token !== countyRequestToken) return
+      set((prev) => ({
+        countyScores: scores,
+        countiesCache: cached
+          ? prev.countiesCache
+          : { ...prev.countiesCache, [usps]: geo },
+        countyViewStateId: usps,
+        scoredCounties: joinCountyScores(geo, scores),
+      }))
+    } catch (err) {
+      set({ stateDataError: err instanceof Error ? err.message : String(err) })
+    }
+  },
 }))
