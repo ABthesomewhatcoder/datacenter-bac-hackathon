@@ -72,6 +72,9 @@ export default function SiteMap() {
 
   const mapRef = useRef<MapRef>(null)
   const hoveredRef = useRef<HoverTarget | null>(null)
+  // Whether the visible tooltip belongs to an H3 cell (deck-owned); the
+  // deck layer's null-hover must not clear a county/state tooltip.
+  const cellTooltipRef = useRef(false)
   const [tooltip, setTooltip] = useState<TooltipInfo | null>(null)
   const [cursor, setCursor] = useState<string>('grab')
 
@@ -144,22 +147,49 @@ export default function SiteMap() {
       if (siteActive) {
         // Site mode: crosshair placement, no region hover feedback.
         setHover(null)
+        cellTooltipRef.current = false
         setTooltip(null)
         setCursor('crosshair')
         return
       }
       if (localActive) {
-        // The H3 layer owns hover feedback in local mode.
+        // The H3 layer owns hover feedback inside the selected county, but
+        // neighboring counties stay hoverable (cells are clipped to the
+        // county, so a hit on another county is genuinely outside them).
+        const neighbor = evt.features?.[0]
+        if (neighbor?.layer?.id === COUNTY_FILL_LAYER_ID) {
+          const props = neighbor.properties as {
+            geoid: string
+            name: string
+            state: string
+          }
+          if (props.geoid !== selectedCountyId) {
+            const score = countyScores?.[props.geoid]
+            setHover({ source: COUNTY_SOURCE_ID, id: props.geoid })
+            setCursor('pointer')
+            cellTooltipRef.current = false
+            setTooltip({
+              x: evt.point.x,
+              y: evt.point.y,
+              title: props.name,
+              subtitle: stateNameById[props.state] ?? props.state,
+              rows: score ? scoreRows(score) : null,
+            })
+            return
+          }
+        }
         setHover(null)
         return
       }
       const feature = evt.features?.[0]
       if (!feature) {
         setHover(null)
+        cellTooltipRef.current = false
         setTooltip(null)
         setCursor('grab')
         return
       }
+      cellTooltipRef.current = false
       setCursor('pointer')
 
       if (feature.layer?.id === COUNTY_FILL_LAYER_ID) {
@@ -190,11 +220,20 @@ export default function SiteMap() {
         rows: score ? scoreRows(score) : null,
       })
     },
-    [siteActive, localActive, setHover, stateScores, countyScores, stateNameById],
+    [
+      siteActive,
+      localActive,
+      selectedCountyId,
+      setHover,
+      stateScores,
+      countyScores,
+      stateNameById,
+    ],
   )
 
   const handleMouseLeave = useCallback(() => {
     setHover(null)
+    cellTooltipRef.current = false
     setTooltip(null)
     setCursor('grab')
   }, [setHover])
@@ -236,7 +275,25 @@ export default function SiteMap() {
         })
         return
       }
-      if (localActive) return // the H3 layer owns clicks in local mode
+      if (localActive) {
+        // The H3 layer owns clicks on the selected county's cells, but a
+        // click on a DIFFERENT county switches the local view to it.
+        const neighbor = evt.features?.[0]
+        if (neighbor?.layer?.id === COUNTY_FILL_LAYER_ID) {
+          const { geoid, state } = neighbor.properties as {
+            geoid: string
+            state: string
+          }
+          if (geoid !== selectedCountyId) {
+            if (useSiteStore.getState().selectedStateId !== state) {
+              setSelectedStateId(state)
+            }
+            setSelectedCountyId(geoid)
+            zoomToCounty(geoid)
+          }
+        }
+        return
+      }
 
       const feature = evt.features?.[0]
       if (!feature) {
@@ -265,6 +322,7 @@ export default function SiteMap() {
     [
       siteActive,
       localActive,
+      selectedCountyId,
       setSelectedSite,
       setSelectedStateId,
       setSelectedCountyId,
@@ -284,11 +342,15 @@ export default function SiteMap() {
   const handleHoverCell = useCallback(
     (info: H3HoverInfo | null) => {
       if (!info) {
-        setTooltip(null)
-        setCursor('grab')
+        if (cellTooltipRef.current) {
+          cellTooltipRef.current = false
+          setTooltip(null)
+          setCursor('grab')
+        }
         return
       }
       const { cell } = info
+      cellTooltipRef.current = true
       setCursor('pointer')
       const row = (label: string, value: number) => ({
         label,

@@ -1,7 +1,7 @@
 import { scoreToColor } from '../../lib/colors'
 import {
   cellForLocation,
-  generateLocalCells,
+  getCellScore,
   type LocalCellScore,
 } from '../../lib/localScoring'
 import { METRICS, type StateScore } from '../../lib/scoring'
@@ -119,9 +119,12 @@ export default function SiteAnalysisPanel() {
   // Cells are generated deterministically and cached, so lookups are cheap.
   const selectedCell =
     selectedH3Index && selectedCountyId && countyFeature && countyScore
-      ? (generateLocalCells(selectedCountyId, countyFeature, countyScore).find(
-          (c) => c.h3Index === selectedH3Index,
-        ) ?? null)
+      ? getCellScore(
+          selectedCountyId,
+          countyFeature,
+          countyScore,
+          selectedH3Index,
+        )
       : null
 
   // Local estimates for the site come from the cell CONTAINING the exact

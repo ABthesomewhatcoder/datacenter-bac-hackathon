@@ -1,5 +1,21 @@
-import { cellToParent, getResolution, latLngToCell, polygonToCells } from 'h3-js'
-import type { Feature, Geometry, Position } from 'geojson'
+import {
+  cellToBoundary,
+  cellToParent,
+  getResolution,
+  gridDisk,
+  latLngToCell,
+  polygonToCells,
+} from 'h3-js'
+import { intersect } from '@turf/intersect'
+import { featureCollection, polygon as turfPolygon } from '@turf/helpers'
+import type {
+  Feature,
+  Geometry,
+  MultiPolygon,
+  Polygon,
+  Position,
+} from 'geojson'
+import { featureContains } from './geo'
 import type { StateScore } from './scoring'
 
 /**
@@ -25,6 +41,15 @@ export interface LocalCellScore {
   landScore: number
   floodScore: number
   transmissionScore: number
+}
+
+/** A scored cell clipped to the county boundary. */
+export type LocalCellFeature = Feature<Polygon | MultiPolygon, LocalCellScore>
+
+export interface LocalSurface {
+  features: LocalCellFeature[]
+  scoreByIndex: Map<string, LocalCellScore>
+  resolution: number
 }
 
 export function localMetricValue(
@@ -71,10 +96,10 @@ function polygonsOf(geometry: Geometry): Position[][][] {
 }
 
 /**
- * Fills a county with H3 cells, picking the smallest resolution that yields
- * at least MIN_CELLS (stepping back if it overshoots MAX_CELLS). Counties
- * vary ~40x in area, so a fixed resolution would give Maricopa thousands of
- * cells or Licking a handful.
+ * Core fill of a county with H3 cells (center-in-polygon), at the smallest
+ * resolution yielding at least MIN_CELLS (stepping back past MAX_CELLS).
+ * Counties vary ~40x in area, so a fixed resolution would give Maricopa
+ * thousands of cells or Licking a handful.
  */
 export function cellsForCounty(feature: Feature<Geometry>): {
   cells: string[]
@@ -100,59 +125,116 @@ export function cellsForCounty(feature: Feature<Geometry>): {
   return previous ?? { cells: [], resolution: RESOLUTIONS[0] }
 }
 
-const cellCache = new Map<string, LocalCellScore[]>()
+function scoreCell(h3Index: string, countyScore: StateScore): LocalCellScore {
+  const regionalScore = countyScore.overall
+  const coarse = cellToParent(h3Index, Math.max(0, getResolution(h3Index) - 2))
+  const blend = (seed: string, base: number, spread: number) =>
+    clampScore(
+      base +
+        0.7 * jitter(coarse + seed, spread) +
+        0.3 * jitter(h3Index + seed, spread),
+    )
+
+  const landScore = blend('land', countyScore.buildability, 16)
+  const floodScore = blend('flood', 78, 20)
+  const transmissionScore = blend('tx', countyScore.power, 18)
+  const overall = Math.round(
+    0.45 * regionalScore +
+      0.2 * landScore +
+      0.2 * transmissionScore +
+      0.15 * floodScore,
+  )
+
+  return {
+    h3Index,
+    overall,
+    regionalScore,
+    landScore,
+    floodScore,
+    transmissionScore,
+  }
+}
+
+const surfaceCache = new Map<string, LocalSurface>()
 
 /**
- * Deterministic mock local scores for a county's H3 cells. The regional
- * baseline inherits the county's overall score; land/flood/transmission
- * start from county metrics and vary with a two-frequency hash (a coarse
- * parent-cell component for spatial coherence plus fine per-cell noise),
- * so refreshes and revisits always produce identical surfaces.
+ * Deterministic mock local surface for a county, CLIPPED to the county
+ * boundary so the hex coverage matches the county shape exactly:
+ *
+ * 1. Core cells come from center-in-polygon fill; their neighbor ring is
+ *    added so the boundary is fully covered (no notches).
+ * 2. Cells entirely inside the county keep their hexagon; cells touching
+ *    the boundary are intersected with the county polygon (partial hexes).
+ * 3. Scores use a two-frequency hash (coarse parent component for spatial
+ *    coherence + fine per-cell noise) seeded by the cell index, so
+ *    refreshes and revisits always produce identical surfaces.
  *
  * overall = 0.45*regional + 0.20*land + 0.20*transmission + 0.15*flood
  */
-export function generateLocalCells(
+export function generateLocalSurface(
   geoid: string,
   feature: Feature<Geometry>,
   countyScore: StateScore,
-): LocalCellScore[] {
-  const cached = cellCache.get(geoid)
+): LocalSurface {
+  const cached = surfaceCache.get(geoid)
   if (cached) return cached
 
-  const { cells } = cellsForCounty(feature)
-  const regionalScore = countyScore.overall
+  const { cells: coreCells, resolution } = cellsForCounty(feature)
 
-  const scored = cells.map((h3Index) => {
-    const coarse = cellToParent(h3Index, Math.max(0, getResolution(h3Index) - 2))
-    const blend = (seed: string, base: number, spread: number) =>
-      clampScore(
-        base +
-          0.7 * jitter(coarse + seed, spread) +
-          0.3 * jitter(h3Index + seed, spread),
-      )
+  // Complete boundary coverage with the neighbor ring of the core fill.
+  const candidates = new Set<string>(coreCells)
+  for (const cell of coreCells) {
+    for (const neighbor of gridDisk(cell, 1)) candidates.add(neighbor)
+  }
 
-    const landScore = blend('land', countyScore.buildability, 16)
-    const floodScore = blend('flood', 78, 20)
-    const transmissionScore = blend('tx', countyScore.power, 18)
-    const overall = Math.round(
-      0.45 * regionalScore +
-        0.2 * landScore +
-        0.2 * transmissionScore +
-        0.15 * floodScore,
+  const countyPoly = feature as Feature<Polygon | MultiPolygon>
+  const features: LocalCellFeature[] = []
+  const scoreByIndex = new Map<string, LocalCellScore>()
+
+  for (const h3Index of [...candidates].sort()) {
+    const boundary = cellToBoundary(h3Index, true)
+    const ring: Position[] = [...boundary, boundary[0]]
+
+    const fullyInside = ring.every(([lng, lat]) =>
+      featureContains(countyPoly, lng, lat),
     )
 
-    return {
-      h3Index,
-      overall,
-      regionalScore,
-      landScore,
-      floodScore,
-      transmissionScore,
+    let geometry: Polygon | MultiPolygon | null = null
+    if (fullyInside) {
+      geometry = { type: 'Polygon', coordinates: [ring] }
+    } else {
+      const clipped = intersect(
+        featureCollection<Polygon | MultiPolygon>([
+          turfPolygon([ring]),
+          countyPoly,
+        ]),
+      )
+      geometry = clipped?.geometry ?? null
     }
-  })
+    if (!geometry) continue
 
-  cellCache.set(geoid, scored)
-  return scored
+    const score = scoreCell(h3Index, countyScore)
+    scoreByIndex.set(h3Index, score)
+    features.push({ type: 'Feature', properties: score, geometry })
+  }
+
+  const surface = { features, scoreByIndex, resolution }
+  surfaceCache.set(geoid, surface)
+  return surface
+}
+
+/** Score of one cell in a county's surface, by H3 index. */
+export function getCellScore(
+  geoid: string,
+  feature: Feature<Geometry>,
+  countyScore: StateScore,
+  h3Index: string,
+): LocalCellScore | null {
+  return (
+    generateLocalSurface(geoid, feature, countyScore).scoreByIndex.get(
+      h3Index,
+    ) ?? null
+  )
 }
 
 /**
@@ -167,9 +249,7 @@ export function cellForLocation(
   latitude: number,
   longitude: number,
 ): LocalCellScore | null {
-  const cells = generateLocalCells(geoid, feature, countyScore)
-  if (cells.length === 0) return null
-  const resolution = getResolution(cells[0].h3Index)
-  const index = latLngToCell(latitude, longitude, resolution)
-  return cells.find((c) => c.h3Index === index) ?? null
+  const surface = generateLocalSurface(geoid, feature, countyScore)
+  const index = latLngToCell(latitude, longitude, surface.resolution)
+  return surface.scoreByIndex.get(index) ?? null
 }

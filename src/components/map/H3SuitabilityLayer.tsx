@@ -1,16 +1,19 @@
 import { useMemo } from 'react'
 import { useControl } from 'react-map-gl/mapbox'
 import { MapboxOverlay } from '@deck.gl/mapbox'
-import { H3HexagonLayer } from '@deck.gl/geo-layers'
+import { GeoJsonLayer } from '@deck.gl/layers'
 import type { DeckProps, PickingInfo } from '@deck.gl/core'
 import { scoreToRgb } from '../../lib/colors'
 import {
-  generateLocalCells,
+  generateLocalSurface,
   localMetricValue,
   type LocalCellScore,
 } from '../../lib/localScoring'
+import type { Feature, Geometry } from 'geojson'
 import { H3_FADE_RANGE, SITE_H3_DIM_RANGE } from '../../lib/mapMode'
 import { useSiteStore } from '../../store/useSiteStore'
+
+type CellFeature = Feature<Geometry, LocalCellScore>
 
 function DeckGLOverlay(props: DeckProps) {
   const overlay = useControl<MapboxOverlay>(() => new MapboxOverlay(props))
@@ -32,11 +35,13 @@ interface H3SuitabilityLayerProps {
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n))
 
 /**
- * Local suitability surface: H3 hexagons generated on the fly (and cached)
- * for the selected county only. Opacity tracks zoom: cells fade in as the
- * county choropleth fades out across H3_FADE_RANGE, then dim heavily (and
- * stop being pickable) across SITE_H3_DIM_RANGE so satellite imagery
- * dominates in site mode. The selected cell outline stays at full strength.
+ * Local suitability surface: H3 cells generated on the fly (and cached)
+ * for the selected county only, clipped to the county boundary so the
+ * coverage matches the county shape exactly. Opacity tracks zoom: cells
+ * fade in as the county choropleth fades out across H3_FADE_RANGE, then
+ * dim heavily (and stop being pickable) across SITE_H3_DIM_RANGE so
+ * satellite imagery dominates in site mode. The selected cell outline
+ * stays at full strength.
  */
 export default function H3SuitabilityLayer({
   onHoverCell,
@@ -49,14 +54,14 @@ export default function H3SuitabilityLayer({
   const selectedH3Index = useSiteStore((s) => s.selectedH3Index)
   const zoom = useSiteStore((s) => s.viewState.zoom)
 
-  const cells = useMemo(() => {
+  const surface = useMemo(() => {
     if (!selectedCountyId) return null
     const feature = scoredCounties?.features.find(
       (f) => f.properties.geoid === selectedCountyId,
     )
     const score = countyScores?.[selectedCountyId]
     if (!feature || !score) return null
-    return generateLocalCells(selectedCountyId, feature, score)
+    return generateLocalSurface(selectedCountyId, feature, score)
   }, [selectedCountyId, scoredCounties, countyScores])
 
   const [fadeFrom, fadeTo] = H3_FADE_RANGE
@@ -70,36 +75,35 @@ export default function H3SuitabilityLayer({
   const pickable = dim < 0.5
 
   const layers = useMemo(() => {
-    if (!cells || fade === 0) return []
+    if (!surface || fade === 0) return []
     return [
-      new H3HexagonLayer<LocalCellScore>({
+      new GeoJsonLayer<LocalCellScore>({
         id: 'h3-suitability',
-        data: cells,
+        data: surface.features,
         opacity: fade,
-        extruded: false,
         filled: true,
         stroked: true,
-        getHexagon: (d) => d.h3Index,
-        getFillColor: (d) => [
-          ...scoreToRgb(localMetricValue(d, activeLocalMetric)),
+        getFillColor: (f: CellFeature) => [
+          ...scoreToRgb(localMetricValue(f.properties, activeLocalMetric)),
           fillAlpha,
         ],
-        getLineColor: (d) =>
-          d.h3Index === selectedH3Index
+        getLineColor: (f: CellFeature) =>
+          f.properties.h3Index === selectedH3Index
             ? [53, 194, 201, 255]
             : [240, 246, 252, lineAlpha],
-        getLineWidth: (d) => (d.h3Index === selectedH3Index ? 3 : 1),
+        getLineWidth: (f: CellFeature) =>
+          f.properties.h3Index === selectedH3Index ? 3 : 1,
         lineWidthUnits: 'pixels',
         pickable,
-        onHover: (info: PickingInfo<LocalCellScore>) => {
+        onHover: (info: PickingInfo<CellFeature>) => {
           onHoverCell(
             info.object
-              ? { x: info.x, y: info.y, cell: info.object }
+              ? { x: info.x, y: info.y, cell: info.object.properties }
               : null,
           )
         },
-        onClick: (info: PickingInfo<LocalCellScore>) => {
-          if (info.object) onClickCell(info.object)
+        onClick: (info: PickingInfo<CellFeature>) => {
+          if (info.object) onClickCell(info.object.properties)
         },
         updateTriggers: {
           getFillColor: [activeLocalMetric, fillAlpha],
@@ -109,7 +113,7 @@ export default function H3SuitabilityLayer({
       }),
     ]
   }, [
-    cells,
+    surface,
     fade,
     fillAlpha,
     lineAlpha,
