@@ -231,19 +231,23 @@ export default function SiteMap() {
 
   const navigateHome = useCallback(() => {
     setSelectedStateId(null)
+    setHover(null)
+    setTooltip(null)
     mapRef.current?.flyTo({
       center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
       zoom: INITIAL_VIEW_STATE.zoom,
       duration: 1400,
     })
-  }, [setSelectedStateId])
+  }, [setSelectedStateId, setHover])
 
   const navigateToState = useCallback(
     (id: string) => {
       setSelectedCountyId(null)
+      setHover(null)
+      setTooltip(null)
       zoomToState(id)
     },
-    [setSelectedCountyId, zoomToState],
+    [setSelectedCountyId, setHover, zoomToState],
   )
 
   if (!MAPBOX_TOKEN) {
