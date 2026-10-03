@@ -1,3 +1,5 @@
+import { legendGradient, SCORE_STOPS } from '../../lib/colors'
+import { METRICS } from '../../lib/scoring'
 import { BASEMAPS, useSiteStore, type BasemapId } from '../../store/useSiteStore'
 
 const BASEMAP_ORDER: BasemapId[] = ['satellite', 'clean']
@@ -5,6 +7,9 @@ const BASEMAP_ORDER: BasemapId[] = ['satellite', 'clean']
 export default function ControlPanel() {
   const basemap = useSiteStore((s) => s.basemap)
   const setBasemap = useSiteStore((s) => s.setBasemap)
+  const activeMetric = useSiteStore((s) => s.activeMetric)
+  const setActiveMetric = useSiteStore((s) => s.setActiveMetric)
+  const stateDataError = useSiteStore((s) => s.stateDataError)
 
   return (
     <aside className="panel panel--left" aria-label="Map controls">
@@ -26,11 +31,44 @@ export default function ControlPanel() {
       </section>
 
       <section className="panel__section">
-        <h2 className="panel__heading">Data Layers</h2>
+        <h2 className="panel__heading">Active Metric</h2>
+        <div
+          className="segmented segmented--grid"
+          role="group"
+          aria-label="Suitability metric"
+        >
+          {METRICS.map(({ id, label }) => (
+            <button
+              key={id}
+              type="button"
+              className={`segmented__option${activeMetric === id ? ' segmented__option--active' : ''}`}
+              aria-pressed={activeMetric === id}
+              onClick={() => setActiveMetric(id)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="panel__section">
+        <h2 className="panel__heading">Suitability</h2>
+        <div className="legend">
+          <div
+            className="legend__ramp"
+            style={{ background: legendGradient() }}
+          />
+          <div className="legend__labels">
+            <span>{SCORE_STOPS[0][0]} · Low</span>
+            <span>High · {SCORE_STOPS[SCORE_STOPS.length - 1][0]}</span>
+          </div>
+        </div>
         <p className="panel__placeholder">
-          Infrastructure, power, fiber, and risk layers will appear here in a
-          later phase.
+          Demo scores — synthetic data for prototyping.
         </p>
+        {stateDataError && (
+          <p className="panel__error">State data failed to load: {stateDataError}</p>
+        )}
       </section>
     </aside>
   )

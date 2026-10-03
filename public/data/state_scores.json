@@ -1,0 +1,379 @@
+{
+  "meta": {
+    "title": "U.S. state data-center suitability scores",
+    "warning": "MOCK / DEMO DATA ONLY — synthetic values for prototyping, not real analysis.",
+    "metrics": [
+      "overall",
+      "power",
+      "water",
+      "buildability"
+    ],
+    "scoreRange": [
+      0,
+      100
+    ],
+    "confidenceRange": [
+      0,
+      1
+    ]
+  },
+  "scores": {
+    "AK": {
+      "overall": 59,
+      "power": 58,
+      "water": 88,
+      "buildability": 32,
+      "confidence": 0.63
+    },
+    "AL": {
+      "overall": 78,
+      "power": 76,
+      "water": 78,
+      "buildability": 80,
+      "confidence": 0.64
+    },
+    "AR": {
+      "overall": 74,
+      "power": 72,
+      "water": 74,
+      "buildability": 78,
+      "confidence": 0.7
+    },
+    "AZ": {
+      "overall": 65,
+      "power": 80,
+      "water": 36,
+      "buildability": 74,
+      "confidence": 0.78
+    },
+    "CA": {
+      "overall": 51,
+      "power": 62,
+      "water": 44,
+      "buildability": 42,
+      "confidence": 0.87
+    },
+    "CO": {
+      "overall": 66,
+      "power": 74,
+      "water": 54,
+      "buildability": 66,
+      "confidence": 0.73
+    },
+    "CT": {
+      "overall": 62,
+      "power": 64,
+      "water": 72,
+      "buildability": 48,
+      "confidence": 0.78
+    },
+    "DC": {
+      "overall": 47,
+      "power": 52,
+      "water": 66,
+      "buildability": 22,
+      "confidence": 0.64
+    },
+    "DE": {
+      "overall": 67,
+      "power": 68,
+      "water": 74,
+      "buildability": 60,
+      "confidence": 0.66
+    },
+    "FL": {
+      "overall": 68,
+      "power": 70,
+      "water": 70,
+      "buildability": 62,
+      "confidence": 0.62
+    },
+    "GA": {
+      "overall": 82,
+      "power": 86,
+      "water": 76,
+      "buildability": 82,
+      "confidence": 0.82
+    },
+    "HI": {
+      "overall": 47,
+      "power": 48,
+      "water": 62,
+      "buildability": 30,
+      "confidence": 0.65
+    },
+    "IA": {
+      "overall": 83,
+      "power": 84,
+      "water": 80,
+      "buildability": 86,
+      "confidence": 0.88
+    },
+    "ID": {
+      "overall": 70,
+      "power": 78,
+      "water": 60,
+      "buildability": 70,
+      "confidence": 0.63
+    },
+    "IL": {
+      "overall": 82,
+      "power": 88,
+      "water": 80,
+      "buildability": 76,
+      "confidence": 0.71
+    },
+    "IN": {
+      "overall": 81,
+      "power": 82,
+      "water": 78,
+      "buildability": 84,
+      "confidence": 0.73
+    },
+    "KS": {
+      "overall": 79,
+      "power": 80,
+      "water": 70,
+      "buildability": 86,
+      "confidence": 0.84
+    },
+    "KY": {
+      "overall": 77,
+      "power": 78,
+      "water": 76,
+      "buildability": 78,
+      "confidence": 0.62
+    },
+    "LA": {
+      "overall": 73,
+      "power": 74,
+      "water": 82,
+      "buildability": 64,
+      "confidence": 0.69
+    },
+    "MA": {
+      "overall": 60,
+      "power": 60,
+      "water": 76,
+      "buildability": 44,
+      "confidence": 0.72
+    },
+    "MD": {
+      "overall": 66,
+      "power": 70,
+      "water": 74,
+      "buildability": 54,
+      "confidence": 0.75
+    },
+    "ME": {
+      "overall": 67,
+      "power": 62,
+      "water": 84,
+      "buildability": 56,
+      "confidence": 0.76
+    },
+    "MI": {
+      "overall": 78,
+      "power": 76,
+      "water": 86,
+      "buildability": 74,
+      "confidence": 0.8
+    },
+    "MN": {
+      "overall": 80,
+      "power": 80,
+      "water": 84,
+      "buildability": 76,
+      "confidence": 0.85
+    },
+    "MO": {
+      "overall": 79,
+      "power": 78,
+      "water": 78,
+      "buildability": 80,
+      "confidence": 0.86
+    },
+    "MS": {
+      "overall": 75,
+      "power": 72,
+      "water": 78,
+      "buildability": 76,
+      "confidence": 0.62
+    },
+    "MT": {
+      "overall": 69,
+      "power": 72,
+      "water": 66,
+      "buildability": 68,
+      "confidence": 0.63
+    },
+    "NC": {
+      "overall": 82,
+      "power": 84,
+      "water": 78,
+      "buildability": 82,
+      "confidence": 0.77
+    },
+    "ND": {
+      "overall": 79,
+      "power": 80,
+      "water": 74,
+      "buildability": 82,
+      "confidence": 0.78
+    },
+    "NE": {
+      "overall": 81,
+      "power": 82,
+      "water": 76,
+      "buildability": 86,
+      "confidence": 0.79
+    },
+    "NH": {
+      "overall": 64,
+      "power": 60,
+      "water": 80,
+      "buildability": 52,
+      "confidence": 0.82
+    },
+    "NJ": {
+      "overall": 61,
+      "power": 66,
+      "water": 72,
+      "buildability": 42,
+      "confidence": 0.84
+    },
+    "NM": {
+      "overall": 63,
+      "power": 74,
+      "water": 40,
+      "buildability": 72,
+      "confidence": 0.87
+    },
+    "NV": {
+      "overall": 62,
+      "power": 76,
+      "water": 32,
+      "buildability": 72,
+      "confidence": 0.68
+    },
+    "NY": {
+      "overall": 64,
+      "power": 68,
+      "water": 78,
+      "buildability": 44,
+      "confidence": 0.71
+    },
+    "OH": {
+      "overall": 85,
+      "power": 88,
+      "water": 82,
+      "buildability": 83,
+      "confidence": 0.85
+    },
+    "OK": {
+      "overall": 76,
+      "power": 78,
+      "water": 66,
+      "buildability": 84,
+      "confidence": 0.88
+    },
+    "OR": {
+      "overall": 75,
+      "power": 88,
+      "water": 72,
+      "buildability": 62,
+      "confidence": 0.67
+    },
+    "PA": {
+      "overall": 79,
+      "power": 84,
+      "water": 80,
+      "buildability": 72,
+      "confidence": 0.81
+    },
+    "RI": {
+      "overall": 58,
+      "power": 58,
+      "water": 74,
+      "buildability": 42,
+      "confidence": 0.67
+    },
+    "SC": {
+      "overall": 80,
+      "power": 84,
+      "water": 76,
+      "buildability": 78,
+      "confidence": 0.64
+    },
+    "SD": {
+      "overall": 78,
+      "power": 78,
+      "water": 72,
+      "buildability": 84,
+      "confidence": 0.65
+    },
+    "TN": {
+      "overall": 82,
+      "power": 85,
+      "water": 80,
+      "buildability": 80,
+      "confidence": 0.78
+    },
+    "TX": {
+      "overall": 78,
+      "power": 86,
+      "water": 58,
+      "buildability": 88,
+      "confidence": 0.88
+    },
+    "UT": {
+      "overall": 65,
+      "power": 78,
+      "water": 44,
+      "buildability": 70,
+      "confidence": 0.87
+    },
+    "VA": {
+      "overall": 83,
+      "power": 90,
+      "water": 78,
+      "buildability": 80,
+      "confidence": 0.71
+    },
+    "VT": {
+      "overall": 64,
+      "power": 58,
+      "water": 82,
+      "buildability": 54,
+      "confidence": 0.62
+    },
+    "WA": {
+      "overall": 78,
+      "power": 92,
+      "water": 76,
+      "buildability": 60,
+      "confidence": 0.74
+    },
+    "WI": {
+      "overall": 78,
+      "power": 76,
+      "water": 84,
+      "buildability": 76,
+      "confidence": 0.82
+    },
+    "WV": {
+      "overall": 73,
+      "power": 80,
+      "water": 78,
+      "buildability": 58,
+      "confidence": 0.67
+    },
+    "WY": {
+      "overall": 69,
+      "power": 76,
+      "water": 56,
+      "buildability": 74,
+      "confidence": 0.7
+    }
+  }
+}

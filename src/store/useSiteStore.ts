@@ -1,4 +1,12 @@
 import { create } from 'zustand'
+import {
+  fetchStateData,
+  joinScores,
+  type Metric,
+  type ScoredStatesGeo,
+  type StateScoreMap,
+  type StatesGeo,
+} from '../lib/scoring'
 
 export type BasemapId = 'satellite' | 'clean'
 
@@ -40,18 +48,51 @@ interface SiteStore {
   viewState: MapViewState
   setViewState: (viewState: MapViewState) => void
 
-  // Placeholder for upcoming phases (site selection, layers, scoring).
-  selectedSiteId: string | null
-  setSelectedSiteId: (id: string | null) => void
+  activeMetric: Metric
+  setActiveMetric: (metric: Metric) => void
+
+  /** Raw state geometry (no scores) — source of truth for fitBounds. */
+  statesGeo: StatesGeo | null
+  /** Score lookup by USPS code, loaded separately from geometry. */
+  stateScores: StateScoreMap | null
+  /** Geometry with scores joined in, fed to the Mapbox source. */
+  scoredStates: ScoredStatesGeo | null
+  stateDataError: string | null
+  loadStateData: () => Promise<void>
+
+  selectedStateId: string | null
+  setSelectedStateId: (id: string | null) => void
 }
 
-export const useSiteStore = create<SiteStore>((set) => ({
+export const useSiteStore = create<SiteStore>((set, get) => ({
   basemap: 'satellite',
   setBasemap: (basemap) => set({ basemap }),
 
   viewState: INITIAL_VIEW_STATE,
   setViewState: (viewState) => set({ viewState }),
 
-  selectedSiteId: null,
-  setSelectedSiteId: (selectedSiteId) => set({ selectedSiteId }),
+  activeMetric: 'overall',
+  setActiveMetric: (activeMetric) => set({ activeMetric }),
+
+  statesGeo: null,
+  stateScores: null,
+  scoredStates: null,
+  stateDataError: null,
+  loadStateData: async () => {
+    if (get().statesGeo) return
+    try {
+      const { geo, scores } = await fetchStateData()
+      set({
+        statesGeo: geo,
+        stateScores: scores,
+        scoredStates: joinScores(geo, scores),
+        stateDataError: null,
+      })
+    } catch (err) {
+      set({ stateDataError: err instanceof Error ? err.message : String(err) })
+    }
+  },
+
+  selectedStateId: null,
+  setSelectedStateId: (selectedStateId) => set({ selectedStateId }),
 }))
