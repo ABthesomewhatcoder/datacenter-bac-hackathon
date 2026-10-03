@@ -9,7 +9,7 @@ import {
   localMetricValue,
   type LocalCellScore,
 } from '../../lib/localScoring'
-import { H3_FADE_RANGE } from '../../lib/mapMode'
+import { H3_FADE_RANGE, SITE_H3_DIM_RANGE } from '../../lib/mapMode'
 import { useSiteStore } from '../../store/useSiteStore'
 
 function DeckGLOverlay(props: DeckProps) {
@@ -29,10 +29,14 @@ interface H3SuitabilityLayerProps {
   onClickCell: (cell: LocalCellScore) => void
 }
 
+const clamp01 = (n: number) => Math.max(0, Math.min(1, n))
+
 /**
  * Local suitability surface: H3 hexagons generated on the fly (and cached)
- * for the selected county only. Opacity tracks zoom so cells fade in as the
- * county choropleth fades out across H3_FADE_RANGE.
+ * for the selected county only. Opacity tracks zoom: cells fade in as the
+ * county choropleth fades out across H3_FADE_RANGE, then dim heavily (and
+ * stop being pickable) across SITE_H3_DIM_RANGE so satellite imagery
+ * dominates in site mode. The selected cell outline stays at full strength.
  */
 export default function H3SuitabilityLayer({
   onHoverCell,
@@ -56,7 +60,14 @@ export default function H3SuitabilityLayer({
   }, [selectedCountyId, scoredCounties, countyScores])
 
   const [fadeFrom, fadeTo] = H3_FADE_RANGE
-  const fade = Math.max(0, Math.min(1, (zoom - fadeFrom) / (fadeTo - fadeFrom)))
+  const fade = clamp01((zoom - fadeFrom) / (fadeTo - fadeFrom))
+
+  const [dimFrom, dimTo] = SITE_H3_DIM_RANGE
+  const dim = clamp01((zoom - dimFrom) / (dimTo - dimFrom))
+  // Rounded so updateTriggers only fire on visible changes during zoom.
+  const fillAlpha = Math.round(150 - 115 * dim)
+  const lineAlpha = Math.round(60 - 38 * dim)
+  const pickable = dim < 0.5
 
   const layers = useMemo(() => {
     if (!cells || fade === 0) return []
@@ -71,15 +82,15 @@ export default function H3SuitabilityLayer({
         getHexagon: (d) => d.h3Index,
         getFillColor: (d) => [
           ...scoreToRgb(localMetricValue(d, activeLocalMetric)),
-          150,
+          fillAlpha,
         ],
         getLineColor: (d) =>
           d.h3Index === selectedH3Index
             ? [53, 194, 201, 255]
-            : [240, 246, 252, 60],
+            : [240, 246, 252, lineAlpha],
         getLineWidth: (d) => (d.h3Index === selectedH3Index ? 3 : 1),
         lineWidthUnits: 'pixels',
-        pickable: true,
+        pickable,
         onHover: (info: PickingInfo<LocalCellScore>) => {
           onHoverCell(
             info.object
@@ -91,13 +102,23 @@ export default function H3SuitabilityLayer({
           if (info.object) onClickCell(info.object)
         },
         updateTriggers: {
-          getFillColor: [activeLocalMetric],
-          getLineColor: [selectedH3Index],
+          getFillColor: [activeLocalMetric, fillAlpha],
+          getLineColor: [selectedH3Index, lineAlpha],
           getLineWidth: [selectedH3Index],
         },
       }),
     ]
-  }, [cells, fade, activeLocalMetric, selectedH3Index, onHoverCell, onClickCell])
+  }, [
+    cells,
+    fade,
+    fillAlpha,
+    lineAlpha,
+    pickable,
+    activeLocalMetric,
+    selectedH3Index,
+    onHoverCell,
+    onClickCell,
+  ])
 
   return <DeckGLOverlay layers={layers} />
 }

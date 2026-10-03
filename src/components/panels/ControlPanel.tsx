@@ -17,9 +17,10 @@ export default function ControlPanel() {
   const zoom = useSiteStore((s) => s.viewState.zoom)
   const stateDataError = useSiteStore((s) => s.stateDataError)
 
-  // In local mode the metric selector drives the H3 surface instead.
+  // In local and site modes the metric selector drives the H3 surface.
+  const mode = getMapMode(zoom)
   const localActive =
-    getMapMode(zoom) === 'local' && selectedCountyId !== null
+    (mode === 'local' || mode === 'site') && selectedCountyId !== null
 
   return (
     <aside className="panel panel--left" aria-label="Map controls">

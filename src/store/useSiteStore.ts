@@ -42,6 +42,14 @@ export interface MapViewState {
   zoom: number
 }
 
+export interface SelectedSite {
+  latitude: number
+  longitude: number
+}
+
+export const RADIUS_OPTIONS_MILES = [5, 10, 25, 50]
+export const DEFAULT_RADIUS_MILES = 10
+
 export const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -98,
   latitude: 39,
@@ -64,6 +72,14 @@ interface SiteStore {
 
   selectedH3Index: string | null
   setSelectedH3Index: (h3Index: string | null) => void
+
+  /** Exact candidate coordinate, placed by clicking the map in site mode. */
+  selectedSite: SelectedSite | null
+  setSelectedSite: (site: SelectedSite) => void
+  clearSelectedSite: () => void
+
+  analysisRadiusMiles: number
+  setAnalysisRadiusMiles: (miles: number) => void
 
   /** Raw state geometry (no scores) — source of truth for fitBounds. */
   statesGeo: StatesGeo | null
@@ -107,7 +123,20 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
   setActiveLocalMetric: (activeLocalMetric) => set({ activeLocalMetric }),
 
   selectedH3Index: null,
-  setSelectedH3Index: (selectedH3Index) => set({ selectedH3Index }),
+  setSelectedH3Index: (selectedH3Index) =>
+    set((prev) => ({
+      selectedH3Index,
+      // Picking a different cell invalidates the previous exact site.
+      selectedSite:
+        selectedH3Index === prev.selectedH3Index ? prev.selectedSite : null,
+    })),
+
+  selectedSite: null,
+  setSelectedSite: (selectedSite) => set({ selectedSite }),
+  clearSelectedSite: () => set({ selectedSite: null }),
+
+  analysisRadiusMiles: DEFAULT_RADIUS_MILES,
+  setAnalysisRadiusMiles: (analysisRadiusMiles) => set({ analysisRadiusMiles }),
 
   statesGeo: null,
   stateScores: null,
@@ -140,19 +169,21 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
         selectedStateId,
         selectedCountyId: keepCounty ? prev.selectedCountyId : null,
         selectedH3Index: keepCounty ? prev.selectedH3Index : null,
+        selectedSite: keepCounty ? prev.selectedSite : null,
       }
     }),
 
   selectedCountyId: null,
   setSelectedCountyId: (selectedCountyId) =>
-    set((prev) => ({
-      selectedCountyId,
-      // Cell selection belongs to one county's local surface.
-      selectedH3Index:
-        selectedCountyId === prev.selectedCountyId
-          ? prev.selectedH3Index
-          : null,
-    })),
+    set((prev) => {
+      // Cell and site selections belong to one county's local surface.
+      const sameCounty = selectedCountyId === prev.selectedCountyId
+      return {
+        selectedCountyId,
+        selectedH3Index: sameCounty ? prev.selectedH3Index : null,
+        selectedSite: sameCounty ? prev.selectedSite : null,
+      }
+    }),
 
   countyViewStateId: null,
   scoredCounties: null,

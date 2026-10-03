@@ -1,4 +1,4 @@
-import { cellToParent, getResolution, polygonToCells } from 'h3-js'
+import { cellToParent, getResolution, latLngToCell, polygonToCells } from 'h3-js'
 import type { Feature, Geometry, Position } from 'geojson'
 import type { StateScore } from './scoring'
 
@@ -153,4 +153,23 @@ export function generateLocalCells(
 
   cellCache.set(geoid, scored)
   return scored
+}
+
+/**
+ * The scored cell containing an exact coordinate, resolved at the county's
+ * generated resolution. Returns null if the point falls outside the
+ * county's cell coverage.
+ */
+export function cellForLocation(
+  geoid: string,
+  feature: Feature<Geometry>,
+  countyScore: StateScore,
+  latitude: number,
+  longitude: number,
+): LocalCellScore | null {
+  const cells = generateLocalCells(geoid, feature, countyScore)
+  if (cells.length === 0) return null
+  const resolution = getResolution(cells[0].h3Index)
+  const index = latLngToCell(latitude, longitude, resolution)
+  return cells.find((c) => c.h3Index === index) ?? null
 }

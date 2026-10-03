@@ -18,6 +18,8 @@ import CountyLayer, {
   COUNTY_SOURCE_ID,
 } from './CountyLayer'
 import H3SuitabilityLayer, { type H3HoverInfo } from './H3SuitabilityLayer'
+import SiteMarker from './SiteMarker'
+import AnalysisRadius from './AnalysisRadius'
 import MapTooltip, { scoreRows, type TooltipInfo } from './MapTooltip'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN
@@ -63,6 +65,9 @@ export default function SiteMap() {
   const setSelectedStateId = useSiteStore((s) => s.setSelectedStateId)
   const setSelectedCountyId = useSiteStore((s) => s.setSelectedCountyId)
   const setSelectedH3Index = useSiteStore((s) => s.setSelectedH3Index)
+  const selectedSite = useSiteStore((s) => s.selectedSite)
+  const setSelectedSite = useSiteStore((s) => s.setSelectedSite)
+  const clearSelectedSite = useSiteStore((s) => s.clearSelectedSite)
   const showCountiesFor = useSiteStore((s) => s.showCountiesFor)
 
   const mapRef = useRef<MapRef>(null)
@@ -70,9 +75,11 @@ export default function SiteMap() {
   const [tooltip, setTooltip] = useState<TooltipInfo | null>(null)
   const [cursor, setCursor] = useState<string>('grab')
 
+  const mode = getMapMode(viewState.zoom)
   // Local mode hands hover/click to the deck.gl H3 layer.
-  const localActive =
-    getMapMode(viewState.zoom) === 'local' && selectedCountyId !== null
+  const localActive = mode === 'local' && selectedCountyId !== null
+  // Site mode turns clicks into exact candidate placement.
+  const siteActive = mode === 'site' && selectedCountyId !== null
 
   const stateNameById = useMemo(() => {
     const names: Record<string, string> = {}
@@ -134,6 +141,13 @@ export default function SiteMap() {
 
   const handleMouseMove = useCallback(
     (evt: MapMouseEvent) => {
+      if (siteActive) {
+        // Site mode: crosshair placement, no region hover feedback.
+        setHover(null)
+        setTooltip(null)
+        setCursor('crosshair')
+        return
+      }
       if (localActive) {
         // The H3 layer owns hover feedback in local mode.
         setHover(null)
@@ -176,7 +190,7 @@ export default function SiteMap() {
         rows: score ? scoreRows(score) : null,
       })
     },
-    [localActive, setHover, stateScores, countyScores, stateNameById],
+    [siteActive, localActive, setHover, stateScores, countyScores, stateNameById],
   )
 
   const handleMouseLeave = useCallback(() => {
@@ -214,6 +228,14 @@ export default function SiteMap() {
 
   const handleClick = useCallback(
     (evt: MapMouseEvent) => {
+      if (siteActive) {
+        // Exact placement: use the raw click coordinate, nothing H3-based.
+        setSelectedSite({
+          latitude: evt.lngLat.lat,
+          longitude: evt.lngLat.lng,
+        })
+        return
+      }
       if (localActive) return // the H3 layer owns clicks in local mode
 
       const feature = evt.features?.[0]
@@ -241,7 +263,9 @@ export default function SiteMap() {
       zoomToState(id)
     },
     [
+      siteActive,
       localActive,
+      setSelectedSite,
       setSelectedStateId,
       setSelectedCountyId,
       showCountiesFor,
@@ -297,6 +321,7 @@ export default function SiteMap() {
 
   const navigateHome = useCallback(() => {
     setSelectedStateId(null)
+    clearSelectedSite()
     setHover(null)
     setTooltip(null)
     mapRef.current?.flyTo({
@@ -304,27 +329,37 @@ export default function SiteMap() {
       zoom: INITIAL_VIEW_STATE.zoom,
       duration: 1400,
     })
-  }, [setSelectedStateId, setHover])
+  }, [setSelectedStateId, clearSelectedSite, setHover])
 
   const navigateToState = useCallback(
     (id: string) => {
       setSelectedCountyId(null)
+      clearSelectedSite()
       setHover(null)
       setTooltip(null)
       zoomToState(id)
     },
-    [setSelectedCountyId, setHover, zoomToState],
+    [setSelectedCountyId, clearSelectedSite, setHover, zoomToState],
   )
 
   const navigateToCounty = useCallback(
     (geoid: string) => {
       setSelectedH3Index(null)
+      clearSelectedSite()
       setHover(null)
       setTooltip(null)
       zoomToCounty(geoid)
     },
-    [setSelectedH3Index, setHover, zoomToCounty],
+    [setSelectedH3Index, clearSelectedSite, setHover, zoomToCounty],
   )
+
+  /** Breadcrumb "Local Analysis": drop the site, return to the H3 surface. */
+  const navigateToLocal = useCallback(() => {
+    clearSelectedSite()
+    setHover(null)
+    setTooltip(null)
+    if (selectedCountyId) zoomToCounty(selectedCountyId)
+  }, [clearSelectedSite, setHover, selectedCountyId, zoomToCounty])
 
   if (!MAPBOX_TOKEN) {
     return <MissingTokenNotice />
@@ -350,10 +385,12 @@ export default function SiteMap() {
       >
         <StateLayer />
         <CountyLayer />
+        <AnalysisRadius />
         <H3SuitabilityLayer
           onHoverCell={handleHoverCell}
           onClickCell={handleClickCell}
         />
+        <SiteMarker />
         <NavigationControl position="bottom-right" visualizePitch />
         <ScaleControl position="bottom-left" unit="imperial" />
       </Map>
@@ -361,7 +398,16 @@ export default function SiteMap() {
         onHome={navigateHome}
         onState={navigateToState}
         onCounty={navigateToCounty}
+        onLocal={navigateToLocal}
       />
+      {siteActive && !selectedSite && (
+        <div className="site-instruction" role="status">
+          <span className="site-instruction__glyph" aria-hidden="true">
+            ⌖
+          </span>
+          Click map to place candidate site
+        </div>
+      )}
       {tooltip && <MapTooltip info={tooltip} />}
     </>
   )
