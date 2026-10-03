@@ -93,7 +93,7 @@ export default function ControlPanel() {
         <div className="toggle-row">
           <div>
             <div className="toggle-row__label">Transmission Lines</div>
-            <div className="toggle-row__sub">HIFLD · real data · local zoom</div>
+            <div className="toggle-row__sub">HIFLD · real data · state zoom +</div>
           </div>
           <button
             type="button"

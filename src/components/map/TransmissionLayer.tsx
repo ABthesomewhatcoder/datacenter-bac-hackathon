@@ -35,12 +35,24 @@ const COLOR_BY_VOLTAGE: ExpressionSpecification = [
   ],
 ] as ExpressionSpecification
 
-/** Fade lines in as local mode begins so county view stays clean. */
+/**
+ * Progressive disclosure: the high-voltage backbone (>=200 kV) appears as
+ * soon as a state is in view; lower-voltage lines fade in approaching
+ * local zoom so the state/county view shows the grid without clutter.
+ */
+const IS_BACKBONE: ExpressionSpecification = [
+  '>=',
+  ['coalesce', ['get', 'voltage'], 0],
+  200,
+]
+
 const OPACITY_BY_ZOOM: ExpressionSpecification = [
   'interpolate',
   ['linear'],
   ['zoom'],
-  7, 0,
+  5.3, 0,
+  6, ['case', IS_BACKBONE, 0.85, 0],
+  7, ['case', IS_BACKBONE, 0.9, 0.35],
   7.8, 0.9,
 ]
 
@@ -70,7 +82,8 @@ export default function TransmissionLayer() {
     ? nearestTransmissionLine(selectedSite, data)
     : null
 
-  const minzoom = MODE_THRESHOLDS.local - 0.5
+  // Lines render from county zoom on; opacity handles the staged reveal.
+  const minzoom = MODE_THRESHOLDS.county - 0.3
 
   return (
     <Source id="transmission" type="geojson" data={data}>
