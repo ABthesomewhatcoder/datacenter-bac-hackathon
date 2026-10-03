@@ -14,6 +14,10 @@ import {
   type StatesGeo,
 } from '../lib/scoring'
 import type { LocalMetric } from '../lib/localScoring'
+import {
+  fetchTransmissionForState,
+  type TransmissionGeo,
+} from '../lib/transmission'
 
 export type BasemapId = 'satellite' | 'clean'
 
@@ -81,6 +85,12 @@ interface SiteStore {
   analysisRadiusMiles: number
   setAnalysisRadiusMiles: (miles: number) => void
 
+  /** REAL transmission-line extracts (HIFLD), cached per state. */
+  transmissionVisible: boolean
+  toggleTransmission: () => void
+  transmissionByState: Record<string, TransmissionGeo | 'missing'>
+  loadTransmissionFor: (usps: string) => Promise<void>
+
   /** Raw state geometry (no scores) — source of truth for fitBounds. */
   statesGeo: StatesGeo | null
   /** Score lookup by USPS code, loaded separately from geometry. */
@@ -137,6 +147,27 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
 
   analysisRadiusMiles: DEFAULT_RADIUS_MILES,
   setAnalysisRadiusMiles: (analysisRadiusMiles) => set({ analysisRadiusMiles }),
+
+  transmissionVisible: true,
+  toggleTransmission: () =>
+    set((prev) => ({ transmissionVisible: !prev.transmissionVisible })),
+  transmissionByState: {},
+  loadTransmissionFor: async (usps) => {
+    if (get().transmissionByState[usps]) return
+    try {
+      const fc = await fetchTransmissionForState(usps)
+      set((prev) => ({
+        transmissionByState: {
+          ...prev.transmissionByState,
+          [usps]: fc ?? 'missing',
+        },
+      }))
+    } catch {
+      set((prev) => ({
+        transmissionByState: { ...prev.transmissionByState, [usps]: 'missing' },
+      }))
+    }
+  },
 
   statesGeo: null,
   stateScores: null,

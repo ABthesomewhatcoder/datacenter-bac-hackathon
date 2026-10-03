@@ -6,6 +6,10 @@ import {
 } from '../../lib/localScoring'
 import { METRICS, type StateScore } from '../../lib/scoring'
 import {
+  nearestTransmissionLine,
+  TRANSMISSION_DATASET,
+} from '../../lib/transmission'
+import {
   RADIUS_OPTIONS_MILES,
   useSiteStore,
 } from '../../store/useSiteStore'
@@ -94,6 +98,16 @@ export default function SiteAnalysisPanel() {
   const countyScores = useSiteStore((s) => s.countyScores)
   const statesGeo = useSiteStore((s) => s.statesGeo)
   const scoredCounties = useSiteStore((s) => s.scoredCounties)
+  const countyViewStateId = useSiteStore((s) => s.countyViewStateId)
+  const transmissionByState = useSiteStore((s) => s.transmissionByState)
+
+  const transmissionData = countyViewStateId
+    ? transmissionByState[countyViewStateId]
+    : undefined
+  const nearestLine =
+    selectedSite && transmissionData && transmissionData !== 'missing'
+      ? nearestTransmissionLine(selectedSite, transmissionData)
+      : null
 
   const stateName = selectedStateId
     ? (statesGeo?.features.find((f) => f.properties.id === selectedStateId)
@@ -261,17 +275,59 @@ export default function SiteAnalysisPanel() {
                     value: siteCell?.landScore ?? null,
                     resolution: 'Demo local estimate',
                   },
-                  {
-                    label: 'Transmission',
-                    value: siteCell?.transmissionScore ?? null,
-                    resolution: 'Demo local estimate',
-                  },
                 ]}
               />
             </div>
 
+            <div>
+              <div className="panel__subheading">Nearest Transmission</div>
+              {nearestLine ? (
+                <div className="site-facts">
+                  <div className="site-fact">
+                    <span>Distance</span>
+                    <span>{nearestLine.distanceMiles.toFixed(1)} mi</span>
+                  </div>
+                  <div className="site-fact">
+                    <span>Voltage</span>
+                    <span>
+                      {nearestLine.properties.voltage
+                        ? `${nearestLine.properties.voltage} kV`
+                        : 'Unknown'}
+                    </span>
+                  </div>
+                  <div className="site-fact">
+                    <span>Owner</span>
+                    <span>{nearestLine.properties.owner ?? 'Unknown'}</span>
+                  </div>
+                  <div className="site-fact">
+                    <span>Status</span>
+                    <span>{nearestLine.properties.status ?? 'Unknown'}</span>
+                  </div>
+                  <div className="site-fact">
+                    <span>Data resolution</span>
+                    <span>Geospatial proximity</span>
+                  </div>
+                  <div className="site-fact">
+                    <span>Source</span>
+                    <span>
+                      {TRANSMISSION_DATASET.source} ·{' '}
+                      {TRANSMISSION_DATASET.dataStatus}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <p className="panel__placeholder">
+                  No nearby line in loaded dataset
+                </p>
+              )}
+              <p className="state-report__hint">
+                {TRANSMISSION_DATASET.caveat}
+              </p>
+            </div>
+
             <p className="state-report__hint">
-              MOCK / DEMO values — no exact-coordinate measurements yet.
+              Regional/local scores are MOCK / DEMO values — transmission
+              proximity is the only real measurement.
             </p>
           </div>
         ) : selectedStateId && (selectedCell || countyScore || stateScore) ? (

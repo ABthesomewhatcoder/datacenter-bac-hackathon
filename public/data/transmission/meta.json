@@ -1,0 +1,40 @@
+{
+  "dataset": "Electric Power Transmission Lines",
+  "sourceOrganization": "HIFLD (Homeland Infrastructure Foundation-Level Data)",
+  "service": "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Electric_Power_Transmission_Lines/FeatureServer/0",
+  "datasetLastEdited": "2023-09-05",
+  "dataStatus": "REAL DATA",
+  "limitations": [
+    "Statewide extracts by bounding box; lines just outside a state border are included.",
+    "Voltage/owner/status missing on some features (shown as Unknown).",
+    "Proximity to a line does not imply available interconnection capacity.",
+    "Geometry rounded to 5 decimal places (~1 m)."
+  ],
+  "states": {
+    "OH": {
+      "lineCount": 1861,
+      "generated": "2026-10-03"
+    },
+    "VA": {
+      "lineCount": 2549,
+      "generated": "2026-10-03"
+    },
+    "AZ": {
+      "lineCount": 423,
+      "generated": "2026-10-03"
+    },
+    "WA": {
+      "lineCount": 2799,
+      "generated": "2026-10-03"
+    },
+    "WY": {
+      "lineCount": 510,
+      "generated": "2026-10-03"
+    }
+  },
+  "references": {
+    "catalog": "https://catalog.data.gov/dataset/electric-power-transmission-lines",
+    "eiaFaq": "https://www.eia.gov/tools/faqs/faq.php?id=567&t=1",
+    "futureEnrichment": "https://data.openei.org/submissions/8742 (Berkeley Lab 2026 harmonized transmission dataset)"
+  }
+}

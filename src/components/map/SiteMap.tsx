@@ -19,6 +19,7 @@ import CountyLayer, {
 } from './CountyLayer'
 import H3SuitabilityLayer, { type H3HoverInfo } from './H3SuitabilityLayer'
 import SiteMarker from './SiteMarker'
+import TransmissionLayer from './TransmissionLayer'
 import AnalysisRadius from './AnalysisRadius'
 import MapTooltip, { scoreRows, type TooltipInfo } from './MapTooltip'
 
@@ -448,6 +449,7 @@ export default function SiteMap() {
         <StateLayer />
         <CountyLayer />
         <AnalysisRadius />
+        <TransmissionLayer />
         <H3SuitabilityLayer
           onHoverCell={handleHoverCell}
           onClickCell={handleClickCell}

@@ -16,6 +16,8 @@ export default function ControlPanel() {
   const selectedCountyId = useSiteStore((s) => s.selectedCountyId)
   const zoom = useSiteStore((s) => s.viewState.zoom)
   const stateDataError = useSiteStore((s) => s.stateDataError)
+  const transmissionVisible = useSiteStore((s) => s.transmissionVisible)
+  const toggleTransmission = useSiteStore((s) => s.toggleTransmission)
 
   // In local and site modes the metric selector drives the H3 surface.
   const mode = getMapMode(zoom)
@@ -82,6 +84,26 @@ export default function ControlPanel() {
             ))}
           </div>
         )}
+      </section>
+
+      <section className="panel__section">
+        <h2 className="panel__heading">Infrastructure</h2>
+        <div className="toggle-row">
+          <div>
+            <div className="toggle-row__label">Transmission Lines</div>
+            <div className="toggle-row__sub">HIFLD · real data · local zoom</div>
+          </div>
+          <button
+            type="button"
+            className={`toggle${transmissionVisible ? ' toggle--on' : ''}`}
+            role="switch"
+            aria-checked={transmissionVisible}
+            aria-label="Toggle transmission lines"
+            onClick={toggleTransmission}
+          >
+            <span className="toggle__thumb" />
+          </button>
+        </div>
       </section>
 
       <section className="panel__section">
