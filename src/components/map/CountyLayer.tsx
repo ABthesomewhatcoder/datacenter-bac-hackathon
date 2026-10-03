@@ -1,6 +1,11 @@
 import { Layer, Source } from 'react-map-gl/mapbox'
+import type { ExpressionSpecification } from 'mapbox-gl'
 import { stateFillColor } from '../../lib/colors'
-import { COUNTY_FADE_RANGE, COUNTY_MIN_RENDER_ZOOM } from '../../lib/mapMode'
+import {
+  COUNTY_FADE_OUT_RANGE,
+  COUNTY_FADE_RANGE,
+  COUNTY_MIN_RENDER_ZOOM,
+} from '../../lib/mapMode'
 import { useSiteStore } from '../../store/useSiteStore'
 
 export const COUNTY_SOURCE_ID = 'us-counties'
@@ -21,6 +26,13 @@ export default function CountyLayer() {
   if (!scoredCounties) return null
 
   const [fadeFrom, fadeTo] = COUNTY_FADE_RANGE
+  const [fadeOutFrom, fadeOutTo] = COUNTY_FADE_OUT_RANGE
+  const hoverOpacity: ExpressionSpecification = [
+    'case',
+    ['boolean', ['feature-state', 'hover'], false],
+    0.8,
+    0.62,
+  ]
 
   return (
     <Source
@@ -35,6 +47,8 @@ export default function CountyLayer() {
         minzoom={COUNTY_MIN_RENDER_ZOOM}
         paint={{
           'fill-color': stateFillColor(activeMetric),
+          // Fade in after state view, fade back out as H3 cells take over
+          // so satellite imagery reads through at local zoom.
           'fill-opacity': [
             'interpolate',
             ['linear'],
@@ -42,12 +56,11 @@ export default function CountyLayer() {
             fadeFrom,
             0,
             fadeTo,
-            [
-              'case',
-              ['boolean', ['feature-state', 'hover'], false],
-              0.8,
-              0.62,
-            ],
+            hoverOpacity,
+            fadeOutFrom,
+            hoverOpacity,
+            fadeOutTo,
+            0,
           ],
         }}
       />

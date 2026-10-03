@@ -1,4 +1,6 @@
 import { legendGradient, SCORE_STOPS } from '../../lib/colors'
+import { LOCAL_METRICS } from '../../lib/localScoring'
+import { getMapMode } from '../../lib/mapMode'
 import { METRICS } from '../../lib/scoring'
 import { BASEMAPS, useSiteStore, type BasemapId } from '../../store/useSiteStore'
 
@@ -9,7 +11,15 @@ export default function ControlPanel() {
   const setBasemap = useSiteStore((s) => s.setBasemap)
   const activeMetric = useSiteStore((s) => s.activeMetric)
   const setActiveMetric = useSiteStore((s) => s.setActiveMetric)
+  const activeLocalMetric = useSiteStore((s) => s.activeLocalMetric)
+  const setActiveLocalMetric = useSiteStore((s) => s.setActiveLocalMetric)
+  const selectedCountyId = useSiteStore((s) => s.selectedCountyId)
+  const zoom = useSiteStore((s) => s.viewState.zoom)
   const stateDataError = useSiteStore((s) => s.stateDataError)
+
+  // In local mode the metric selector drives the H3 surface instead.
+  const localActive =
+    getMapMode(zoom) === 'local' && selectedCountyId !== null
 
   return (
     <aside className="panel panel--left" aria-label="Map controls">
@@ -31,24 +41,46 @@ export default function ControlPanel() {
       </section>
 
       <section className="panel__section">
-        <h2 className="panel__heading">Active Metric</h2>
-        <div
-          className="segmented segmented--grid"
-          role="group"
-          aria-label="Suitability metric"
-        >
-          {METRICS.map(({ id, label }) => (
-            <button
-              key={id}
-              type="button"
-              className={`segmented__option${activeMetric === id ? ' segmented__option--active' : ''}`}
-              aria-pressed={activeMetric === id}
-              onClick={() => setActiveMetric(id)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <h2 className="panel__heading">
+          {localActive ? 'Active Metric · Local' : 'Active Metric'}
+        </h2>
+        {localActive ? (
+          <div
+            className="segmented segmented--grid"
+            role="group"
+            aria-label="Local suitability metric"
+          >
+            {LOCAL_METRICS.map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                className={`segmented__option${activeLocalMetric === id ? ' segmented__option--active' : ''}`}
+                aria-pressed={activeLocalMetric === id}
+                onClick={() => setActiveLocalMetric(id)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div
+            className="segmented segmented--grid"
+            role="group"
+            aria-label="Suitability metric"
+          >
+            {METRICS.map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                className={`segmented__option${activeMetric === id ? ' segmented__option--active' : ''}`}
+                aria-pressed={activeMetric === id}
+                onClick={() => setActiveMetric(id)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="panel__section">

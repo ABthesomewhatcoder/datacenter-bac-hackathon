@@ -1,21 +1,32 @@
 import { scoreToColor } from '../../lib/colors'
 import type { StateScore } from '../../lib/scoring'
 
+export interface TooltipRow {
+  label: string
+  value: number
+  color?: string
+}
+
 export interface TooltipInfo {
   x: number
   y: number
-  name: string
+  title: string
   /** Secondary line, e.g. the parent state for a county. */
   subtitle?: string
-  score: StateScore | null
+  rows: TooltipRow[] | null
 }
 
-const ROWS: Array<{ key: keyof StateScore; label: string }> = [
-  { key: 'overall', label: 'Overall' },
-  { key: 'power', label: 'Power' },
-  { key: 'water', label: 'Water' },
-  { key: 'buildability', label: 'Buildability' },
-]
+/** Standard rows for a state/county score. */
+export function scoreRows(score: StateScore): TooltipRow[] {
+  return (
+    [
+      ['Overall', score.overall],
+      ['Power', score.power],
+      ['Water', score.water],
+      ['Buildability', score.buildability],
+    ] as Array<[string, number]>
+  ).map(([label, value]) => ({ label, value, color: scoreToColor(value) }))
+}
 
 export default function MapTooltip({ info }: { info: TooltipInfo }) {
   return (
@@ -23,21 +34,23 @@ export default function MapTooltip({ info }: { info: TooltipInfo }) {
       className="map-tooltip"
       style={{ transform: `translate(${info.x + 14}px, ${info.y + 14}px)` }}
     >
-      <div className="map-tooltip__title">{info.name}</div>
+      <div className="map-tooltip__title">{info.title}</div>
       {info.subtitle && (
         <div className="map-tooltip__subtitle">{info.subtitle}</div>
       )}
-      {info.score ? (
+      {info.rows ? (
         <dl className="map-tooltip__rows">
-          {ROWS.map(({ key, label }) => (
-            <div key={key} className="map-tooltip__row">
+          {info.rows.map(({ label, value, color }) => (
+            <div key={label} className="map-tooltip__row">
               <dt>{label}</dt>
               <dd>
-                <span
-                  className="map-tooltip__dot"
-                  style={{ background: scoreToColor(info.score![key]) }}
-                />
-                {info.score![key]}
+                {color && (
+                  <span
+                    className="map-tooltip__dot"
+                    style={{ background: color }}
+                  />
+                )}
+                {value}
               </dd>
             </div>
           ))}

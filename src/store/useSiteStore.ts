@@ -13,6 +13,7 @@ import {
   type StateScoreMap,
   type StatesGeo,
 } from '../lib/scoring'
+import type { LocalMetric } from '../lib/localScoring'
 
 export type BasemapId = 'satellite' | 'clean'
 
@@ -57,6 +58,13 @@ interface SiteStore {
   activeMetric: Metric
   setActiveMetric: (metric: Metric) => void
 
+  /** Metric driving H3 cell colors in local mode (separate from region metric). */
+  activeLocalMetric: LocalMetric
+  setActiveLocalMetric: (metric: LocalMetric) => void
+
+  selectedH3Index: string | null
+  setSelectedH3Index: (h3Index: string | null) => void
+
   /** Raw state geometry (no scores) — source of truth for fitBounds. */
   statesGeo: StatesGeo | null
   /** Score lookup by USPS code, loaded separately from geometry. */
@@ -95,6 +103,12 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
   activeMetric: 'overall',
   setActiveMetric: (activeMetric) => set({ activeMetric }),
 
+  activeLocalMetric: 'overall',
+  setActiveLocalMetric: (activeLocalMetric) => set({ activeLocalMetric }),
+
+  selectedH3Index: null,
+  setSelectedH3Index: (selectedH3Index) => set({ selectedH3Index }),
+
   statesGeo: null,
   stateScores: null,
   scoredStates: null,
@@ -116,19 +130,29 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
 
   selectedStateId: null,
   setSelectedStateId: (selectedStateId) =>
-    set((prev) => ({
-      selectedStateId,
+    set((prev) => {
       // A county selection only makes sense inside its own state.
-      selectedCountyId:
+      const keepCounty =
         selectedStateId &&
         prev.selectedCountyId &&
         prev.countyViewStateId === selectedStateId
-          ? prev.selectedCountyId
-          : null,
-    })),
+      return {
+        selectedStateId,
+        selectedCountyId: keepCounty ? prev.selectedCountyId : null,
+        selectedH3Index: keepCounty ? prev.selectedH3Index : null,
+      }
+    }),
 
   selectedCountyId: null,
-  setSelectedCountyId: (selectedCountyId) => set({ selectedCountyId }),
+  setSelectedCountyId: (selectedCountyId) =>
+    set((prev) => ({
+      selectedCountyId,
+      // Cell selection belongs to one county's local surface.
+      selectedH3Index:
+        selectedCountyId === prev.selectedCountyId
+          ? prev.selectedH3Index
+          : null,
+    })),
 
   countyViewStateId: null,
   scoredCounties: null,

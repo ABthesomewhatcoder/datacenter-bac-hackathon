@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Map, { NavigationControl, ScaleControl } from 'react-map-gl/mapbox'
 import type { MapMouseEvent, MapRef, ViewStateChangeEvent } from 'react-map-gl/mapbox'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import { scoreToColor } from '../../lib/colors'
 import { featureBounds, featureContains } from '../../lib/geo'
+import type { LocalCellScore } from '../../lib/localScoring'
 import { getMapMode } from '../../lib/mapMode'
 import Breadcrumb from '../layout/Breadcrumb'
 import {
@@ -15,7 +17,8 @@ import CountyLayer, {
   COUNTY_FILL_LAYER_ID,
   COUNTY_SOURCE_ID,
 } from './CountyLayer'
-import MapTooltip, { type TooltipInfo } from './MapTooltip'
+import H3SuitabilityLayer, { type H3HoverInfo } from './H3SuitabilityLayer'
+import MapTooltip, { scoreRows, type TooltipInfo } from './MapTooltip'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN
 
@@ -56,14 +59,20 @@ export default function SiteMap() {
   const stateScores = useSiteStore((s) => s.stateScores)
   const countyScores = useSiteStore((s) => s.countyScores)
   const scoredCounties = useSiteStore((s) => s.scoredCounties)
+  const selectedCountyId = useSiteStore((s) => s.selectedCountyId)
   const setSelectedStateId = useSiteStore((s) => s.setSelectedStateId)
   const setSelectedCountyId = useSiteStore((s) => s.setSelectedCountyId)
+  const setSelectedH3Index = useSiteStore((s) => s.setSelectedH3Index)
   const showCountiesFor = useSiteStore((s) => s.showCountiesFor)
 
   const mapRef = useRef<MapRef>(null)
   const hoveredRef = useRef<HoverTarget | null>(null)
   const [tooltip, setTooltip] = useState<TooltipInfo | null>(null)
   const [cursor, setCursor] = useState<string>('grab')
+
+  // Local mode hands hover/click to the deck.gl H3 layer.
+  const localActive =
+    getMapMode(viewState.zoom) === 'local' && selectedCountyId !== null
 
   const stateNameById = useMemo(() => {
     const names: Record<string, string> = {}
@@ -85,11 +94,11 @@ export default function SiteMap() {
     [setViewState],
   )
 
-  /** When settled in county mode, load counties for the state in focus. */
+  /** When settled past state zoom, load counties for the state in focus. */
   const handleMoveEnd = useCallback(
     (evt: ViewStateChangeEvent) => {
       const { longitude, latitude, zoom } = evt.viewState
-      if (getMapMode(zoom) !== 'county' || !statesGeo) return
+      if (getMapMode(zoom) === 'state' || !statesGeo) return
       const centerState = statesGeo.features.find((f) =>
         featureContains(f, longitude, latitude),
       )?.properties.id
@@ -125,6 +134,11 @@ export default function SiteMap() {
 
   const handleMouseMove = useCallback(
     (evt: MapMouseEvent) => {
+      if (localActive) {
+        // The H3 layer owns hover feedback in local mode.
+        setHover(null)
+        return
+      }
       const feature = evt.features?.[0]
       if (!feature) {
         setHover(null)
@@ -140,27 +154,29 @@ export default function SiteMap() {
           name: string
           state: string
         }
+        const score = countyScores?.[props.geoid]
         setHover({ source: COUNTY_SOURCE_ID, id: props.geoid })
         setTooltip({
           x: evt.point.x,
           y: evt.point.y,
-          name: props.name,
+          title: props.name,
           subtitle: stateNameById[props.state] ?? props.state,
-          score: countyScores?.[props.geoid] ?? null,
+          rows: score ? scoreRows(score) : null,
         })
         return
       }
 
       const props = feature.properties as { id: string; name: string }
+      const score = stateScores?.[props.id]
       setHover({ source: STATE_SOURCE_ID, id: props.id })
       setTooltip({
         x: evt.point.x,
         y: evt.point.y,
-        name: props.name,
-        score: stateScores?.[props.id] ?? null,
+        title: props.name,
+        rows: score ? scoreRows(score) : null,
       })
     },
-    [setHover, stateScores, countyScores, stateNameById],
+    [localActive, setHover, stateScores, countyScores, stateNameById],
   )
 
   const handleMouseLeave = useCallback(() => {
@@ -176,15 +192,30 @@ export default function SiteMap() {
         mapRef.current.fitBounds(featureBounds(feature), {
           padding: FIT_PADDING,
           duration: 1400,
-          maxZoom: 7.5,
+          maxZoom: 7.4,
         })
       }
     },
     [statesGeo],
   )
 
+  const zoomToCounty = useCallback((geoid: string) => {
+    const feature = useSiteStore
+      .getState()
+      .scoredCounties?.features.find((f) => f.properties.geoid === geoid)
+    if (feature && mapRef.current) {
+      mapRef.current.fitBounds(featureBounds(feature), {
+        padding: FIT_PADDING,
+        duration: 1200,
+        maxZoom: 9.5,
+      })
+    }
+  }, [])
+
   const handleClick = useCallback(
     (evt: MapMouseEvent) => {
+      if (localActive) return // the H3 layer owns clicks in local mode
+
       const feature = evt.features?.[0]
       if (!feature) {
         setSelectedStateId(null)
@@ -200,18 +231,7 @@ export default function SiteMap() {
           setSelectedStateId(state)
         }
         setSelectedCountyId(geoid)
-        // fitBounds uses the original (unclipped) geometry from the store,
-        // not the tile-clipped feature returned by the event.
-        const source = scoredCounties?.features.find(
-          (f) => f.properties.geoid === geoid,
-        )
-        if (source && mapRef.current) {
-          mapRef.current.fitBounds(featureBounds(source), {
-            padding: FIT_PADDING,
-            duration: 1200,
-            maxZoom: 9.5,
-          })
-        }
+        zoomToCounty(geoid)
         return
       }
 
@@ -221,12 +241,58 @@ export default function SiteMap() {
       zoomToState(id)
     },
     [
+      localActive,
       setSelectedStateId,
       setSelectedCountyId,
-      scoredCounties,
       showCountiesFor,
       zoomToState,
+      zoomToCounty,
     ],
+  )
+
+  const countyNameById = useCallback(
+    (geoid: string) =>
+      scoredCounties?.features.find((f) => f.properties.geoid === geoid)
+        ?.properties.name ?? geoid,
+    [scoredCounties],
+  )
+
+  const handleHoverCell = useCallback(
+    (info: H3HoverInfo | null) => {
+      if (!info) {
+        setTooltip(null)
+        setCursor('grab')
+        return
+      }
+      const { cell } = info
+      setCursor('pointer')
+      const row = (label: string, value: number) => ({
+        label,
+        value,
+        color: scoreToColor(value),
+      })
+      setTooltip({
+        x: info.x,
+        y: info.y,
+        title: selectedCountyId ? countyNameById(selectedCountyId) : 'Local cell',
+        subtitle: 'Local analysis · demo data',
+        rows: [
+          row('Local Suitability', cell.overall),
+          row('Land', cell.landScore),
+          row('Flood', cell.floodScore),
+          row('Transmission', cell.transmissionScore),
+          row('Regional baseline', cell.regionalScore),
+        ],
+      })
+    },
+    [selectedCountyId, countyNameById],
+  )
+
+  const handleClickCell = useCallback(
+    (cell: LocalCellScore) => {
+      setSelectedH3Index(cell.h3Index)
+    },
+    [setSelectedH3Index],
   )
 
   const navigateHome = useCallback(() => {
@@ -248,6 +314,16 @@ export default function SiteMap() {
       zoomToState(id)
     },
     [setSelectedCountyId, setHover, zoomToState],
+  )
+
+  const navigateToCounty = useCallback(
+    (geoid: string) => {
+      setSelectedH3Index(null)
+      setHover(null)
+      setTooltip(null)
+      zoomToCounty(geoid)
+    },
+    [setSelectedH3Index, setHover, zoomToCounty],
   )
 
   if (!MAPBOX_TOKEN) {
@@ -274,10 +350,18 @@ export default function SiteMap() {
       >
         <StateLayer />
         <CountyLayer />
+        <H3SuitabilityLayer
+          onHoverCell={handleHoverCell}
+          onClickCell={handleClickCell}
+        />
         <NavigationControl position="bottom-right" visualizePitch />
         <ScaleControl position="bottom-left" unit="imperial" />
       </Map>
-      <Breadcrumb onHome={navigateHome} onState={navigateToState} />
+      <Breadcrumb
+        onHome={navigateHome}
+        onState={navigateToState}
+        onCounty={navigateToCounty}
+      />
       {tooltip && <MapTooltip info={tooltip} />}
     </>
   )

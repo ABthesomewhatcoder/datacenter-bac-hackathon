@@ -21,17 +21,20 @@ function hexToRgb(hex: string): [number, number, number] {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
 }
 
-function mix(a: string, b: string, t: number): string {
+function mix(a: string, b: string, t: number): [number, number, number] {
   const ca = hexToRgb(a)
   const cb = hexToRgb(b)
-  const c = ca.map((v, i) => Math.round(v + (cb[i] - v) * t))
-  return `rgb(${c[0]}, ${c[1]}, ${c[2]})`
+  return [
+    Math.round(ca[0] + (cb[0] - ca[0]) * t),
+    Math.round(ca[1] + (cb[1] - ca[1]) * t),
+    Math.round(ca[2] + (cb[2] - ca[2]) * t),
+  ]
 }
 
 /** JS-side equivalent of the map's linear interpolation over SCORE_STOPS. */
-export function scoreToColor(score: number): string {
+export function scoreToRgb(score: number): [number, number, number] {
   const stops = SCORE_STOPS
-  if (score <= stops[0][0]) return stops[0][1]
+  if (score <= stops[0][0]) return hexToRgb(stops[0][1])
   for (let i = 1; i < stops.length; i++) {
     const [stop, color] = stops[i]
     if (score <= stop) {
@@ -39,7 +42,12 @@ export function scoreToColor(score: number): string {
       return mix(prevColor, color, (score - prevStop) / (stop - prevStop))
     }
   }
-  return stops[stops.length - 1][1]
+  return hexToRgb(stops[stops.length - 1][1])
+}
+
+export function scoreToColor(score: number): string {
+  const [r, g, b] = scoreToRgb(score)
+  return `rgb(${r}, ${g}, ${b})`
 }
 
 /** Data-driven fill color for the state layer, keyed to the active metric. */
