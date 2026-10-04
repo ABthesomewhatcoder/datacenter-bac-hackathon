@@ -99,6 +99,22 @@ runtime (no key required).
 
 ## Data sources
 
+Every source used anywhere in the product, at a glance:
+
+| Source | Used for | Access |
+| --- | --- | --- |
+| EPA eGRID2023 Rev. 2 | Grid carbon intensity (site context, simulator CO2e, carbon pillar, map overlay) | Preprocessed, committed |
+| WRI Aqueduct 4.0 (+ HydroSHEDS basins) | Water stress baseline/2030/2050 (site context, water pillar, map overlay) | Preprocessed, committed |
+| HIFLD Transmission Lines | Nearest-line distance/voltage (site + regional screening, map layer) | Preprocessed, committed |
+| FEMA National Flood Hazard Layer | Flood zones, hard exclusions, physical pillar | Live API at runtime |
+| USGS Annual NLCD 2025 (Collection 1.2) | Land cover, hard exclusions, physical pillar | Live API at runtime |
+| Moratorium Nation 2026 | Local moratoria + state policy (regulatory context, community pillar, map layer) | Preprocessed, committed |
+| NERC 2026 Summer Reliability Assessment | Reserve margins + seasonal risk (power pillar, grid context) | Hand-extracted, committed |
+| EIA-style state generation & retail sales | Generation/sales balance, demand growth, facility burden | Committed in `data-sources/` |
+| U.S. Census boundaries (2010, 20m) | State/county geometry + representative points | Preprocessed, committed |
+| DOE / EPA / Microsoft methodology docs | Simulator formulas and PUE/WUE benchmarks | Cited methodology |
+| Mapbox (© Mapbox/OpenStreetMap/Maxar) | Satellite + dark basemaps | Runtime, needs free token |
+
 ### EPA eGRID2023 Revision 2 (grid carbon intensity)
 
 Subregion polygons + CO2e **total output** emission rates (field SRC2ERTA —
@@ -117,6 +133,7 @@ HydroBASINS level-6 sub-basins. CC BY 4.0 © World Resources Institute.
 Preprocessed by `scripts/prepare-aqueduct.mjs`, committed in
 `public/data/aqueduct/`.
 
+- <https://www.wri.org/data/aqueduct-global-maps-40-data>
 - <https://files.wri.org/aqueduct/aqueduct-4-0-water-risk-data.zip>
 - <https://data.hydrosheds.org/file/HydroBASINS/standard/hybas_na_lev06_v1c.zip> (basin geometry © HydroSHEDS/WWF)
 - <https://github.com/wri/Aqueduct40/blob/master/data_dictionary_water-risk-atlas.md>
@@ -141,7 +158,8 @@ from the public ArcGIS REST service — no key required.
 2025 land cover at 30 m resolution, queried **live at runtime** from the
 official USGS/MRLC GeoServer WMS — no key required.
 
-- <https://dmsdata.cr.usgs.gov/geoserver/mrlc_Land-Cover-Native_conus_year_data/wms>
+- Product: <https://www.usgs.gov/data/annual-national-land-cover-database-nlcd-collection-1-products-ver-12-june-2026>
+- WMS: <https://dmsdata.cr.usgs.gov/geoserver/mrlc_Land-Cover-Native_conus_year_data/wms>
 - Legend: <https://www.mrlc.gov/data/type/land-cover>
 
 ### U.S. Census (state/county geometry)
@@ -161,18 +179,27 @@ establishes that a site is legally subject to a moratorium.
 - <https://github.com/mjbommar/moratorium-data-2026>
 - <https://raw.githubusercontent.com/mjbommar/moratorium-data-2026/main/data/moratorium_inventory.csv>
 - <https://raw.githubusercontent.com/mjbommar/moratorium-data-2026/main/data/state_legislation.csv>
+- Codebook: <https://github.com/mjbommar/moratorium-data-2026/blob/main/docs/codebook.md>
+- Methodology / known gaps: <https://github.com/mjbommar/moratorium-data-2026/blob/main/docs/methodology.md> · <https://github.com/mjbommar/moratorium-data-2026/blob/main/docs/known-gaps.md>
 - Paper: <https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6242898>
 
-### Power & grid context
+Attribution: *Regulatory data: Bommarito, M.J. (2026), Moratorium Nation — CC BY 4.0.*
 
-Per-state generation (EIA-style annual net generation, Total Electric
-Power Industry / Total, latest year 2024), retail sales with 5-year
-growth, and NERC Summer 2026 reserve margins, preprocessed by
-`scripts/prepare-grid-context.mjs` from `data-sources/` into
-`public/data/grid/`. States split across NERC assessment areas are
-reported as "NERC regional context unavailable" rather than guessed.
-Annual generation balance (generation − sales) is an energy accounting
-figure — never spare capacity or available power.
+### Power & grid context (EIA-style state data + NERC)
+
+Per-state generation (annual net generation, Total Electric Power
+Industry / Total, latest year 2024) and retail sales with 5-year growth —
+committed as `data-sources/annual_energy_supply.json` and
+`data-sources/state_electricity_demand.json` — joined with NERC Summer
+2026 reserve margins by `scripts/prepare-grid-context.mjs` into
+`public/data/grid/`. The NERC Anticipated Reserve Margin / Reference
+Margin Level values for all 22 assessment areas were extracted from the
+2026 SRA's Demand and Resource Tables (pp. 45–55) into
+`data-sources/nerc_sra_2026_margins.json` with the Key Findings risk
+classification. States split across NERC assessment areas are reported
+as "NERC regional context unavailable" rather than guessed. Annual
+generation balance (generation − sales) is an energy accounting figure —
+never spare capacity or available power.
 
 - NERC 2026 Summer Reliability Assessment: <https://www.nerc.com/globalassets/our-work/assessments/nerc_sra_2026.pdf>
 - NERC 2025 Long-Term Reliability Assessment: <https://www.nerc.com/globalassets/our-work/assessments/nerc_ltra_2025.pdf>
@@ -183,6 +210,12 @@ figure — never spare capacity or available power.
 - [DOE Data Center Best Practices Guide](https://www.energy.gov/sites/default/files/2024-07/best-practice-guide-data-center-design_0.pdf) — PUE definition and reference points (1.6 Standard / 1.4 Good / 1.1 Better)
 - [DOE FEMP cooling/water efficiency guidance](https://www.energy.gov/cmei/femp/cooling-water-efficiency-opportunities-federal-data-centers)
 - [Microsoft PUE/WUE methodology and FY25 benchmarks](https://datacenters.microsoft.com/sustainability/efficiency/) — WUE = annual liters for cooling/humidification ÷ annual IT equipment kWh; FY25 WUE 0.27 L/kWh global, 0.34 L/kWh Americas (used as scenario presets, not site measurements)
+
+### Basemaps
+
+Map rendering via Mapbox GL (`satellite-streets-v12`, `dark-v11` styles) —
+imagery/tiles © Mapbox, © OpenStreetMap contributors, © Maxar. Requires a
+free Mapbox token (the only credential in the project).
 
 ## Structure
 
