@@ -1,0 +1,18 @@
+{
+  "dataset": "WRI Aqueduct 4.0 (Y2023M07D05 release, download dated 2023-08-07)",
+  "sourceOrganization": "World Resources Institute",
+  "dataStatus": "REAL DATA",
+  "license": "CC BY 4.0 — Aqueduct 4.0 © World Resources Institute (wri.org/aqueduct)",
+  "geometry": "HydroBASINS North America level 6 (© HydroSHEDS/WWF), the sub-basin framework of Aqueduct 4.0 annual indicators, joined by Pfafstetter id",
+  "fields": {
+    "baseline": "bws_raw, bws_score, bws_cat, bws_label",
+    "future": "bau30_ws_x_{r,s,l}, bau50_ws_x_{r,s,l}, bau80_ws_x_{s,l} (Business as Usual)"
+  },
+  "note": "Basin/sub-basin screening estimates — not parcel-level water availability.",
+  "sources": [
+    "https://files.wri.org/aqueduct/aqueduct-4-0-water-risk-data.zip",
+    "https://data.hydrosheds.org/file/HydroBASINS/standard/hybas_na_lev06_v1c.zip",
+    "https://github.com/wri/Aqueduct40/blob/master/data_dictionary_water-risk-atlas.md"
+  ],
+  "generated": "2026-10-04"
+}

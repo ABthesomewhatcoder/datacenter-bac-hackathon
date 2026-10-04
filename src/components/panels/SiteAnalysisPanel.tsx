@@ -5,6 +5,7 @@ import {
   FLOOD_RISK_COLORS,
   FLOOD_RISK_LABELS,
 } from '../../lib/flood'
+import { AQUEDUCT_DATASET } from '../../lib/aqueduct'
 import { EGRID_DATASET } from '../../lib/egrid'
 import { NLCD_DATASET } from '../../lib/landCover'
 import {
@@ -114,14 +115,23 @@ export default function SiteAnalysisPanel() {
   const assessSiteLandCover = useSiteStore((s) => s.assessSiteLandCover)
   const egridAssessment = useSiteStore((s) => s.egridAssessment)
   const assessSiteEgrid = useSiteStore((s) => s.assessSiteEgrid)
+  const waterAssessment = useSiteStore((s) => s.waterAssessment)
+  const assessSiteWater = useSiteStore((s) => s.assessSiteWater)
 
   useEffect(() => {
     if (selectedSite) {
       assessSiteFlood(selectedSite)
       assessSiteLandCover(selectedSite)
       assessSiteEgrid(selectedSite)
+      assessSiteWater(selectedSite)
     }
-  }, [selectedSite, assessSiteFlood, assessSiteLandCover, assessSiteEgrid])
+  }, [
+    selectedSite,
+    assessSiteFlood,
+    assessSiteLandCover,
+    assessSiteEgrid,
+    assessSiteWater,
+  ])
 
   const siteKey = selectedSite
     ? `${selectedSite.latitude.toFixed(5)},${selectedSite.longitude.toFixed(5)}`
@@ -134,6 +144,10 @@ export default function SiteAnalysisPanel() {
       : null
   const egrid =
     siteKey && egridAssessment?.key === siteKey ? egridAssessment.result : null
+  const water =
+    siteKey && waterAssessment?.key === siteKey
+      ? waterAssessment.result
+      : undefined
 
   const transmissionData = countyViewStateId
     ? transmissionByState[countyViewStateId]
@@ -360,6 +374,82 @@ export default function SiteAnalysisPanel() {
             </div>
 
             <div>
+              <div className="panel__subheading">Water Stress</div>
+              {water === 'loading' || (selectedSite && water === undefined) ? (
+                <p className="panel__placeholder">Resolving Aqueduct basin…</p>
+              ) : water === 'error' ? (
+                <p className="panel__placeholder">
+                  WRI Aqueduct data temporarily unavailable
+                </p>
+              ) : water === null ? (
+                <>
+                  <div className="site-facts">
+                    <div className="site-fact">
+                      <span>Water Stress</span>
+                      <span>UNKNOWN</span>
+                    </div>
+                    <div className="site-fact">
+                      <span>Coverage</span>
+                      <span>No Aqueduct basin at this location</span>
+                    </div>
+                  </div>
+                  <p className="state-report__hint">
+                    {AQUEDUCT_DATASET.caveat}
+                  </p>
+                </>
+              ) : water ? (
+                <>
+                  <div className="site-facts">
+                    <div className="site-fact">
+                      <span>Water Stress</span>
+                      <span>{water.baseline.label ?? 'Unknown'}</span>
+                    </div>
+                    <div className="site-fact">
+                      <span>Aqueduct Score</span>
+                      <span>
+                        {water.baseline.score !== null
+                          ? `${water.baseline.score.toFixed(1)} / 5`
+                          : 'Unknown'}
+                      </span>
+                    </div>
+                    <div className="site-fact">
+                      <span>2030 BAU</span>
+                      <span>{water.bau2030.label ?? 'Unknown'}</span>
+                    </div>
+                    <div className="site-fact">
+                      <span>2050 BAU</span>
+                      <span>{water.bau2050.label ?? 'Unknown'}</span>
+                    </div>
+                    <div className="site-fact">
+                      <span>Constraint</span>
+                      <span className="mono">
+                        {water.constraint.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="site-fact">
+                      <span>Basin</span>
+                      <span className="mono">{water.basinId}</span>
+                    </div>
+                    <div className="site-fact">
+                      <span>Resolution</span>
+                      <span>{water.resolution}</span>
+                    </div>
+                    <div className="site-fact">
+                      <span>Source</span>
+                      <span>
+                        {AQUEDUCT_DATASET.source} ·{' '}
+                        {AQUEDUCT_DATASET.dataStatus}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="state-report__hint">
+                    {AQUEDUCT_DATASET.caveat} {AQUEDUCT_DATASET.attribution}.
+                  </p>
+                </>
+              ) : null}
+            </div>
+
+            <div>
               <div className="panel__subheading">Grid Carbon Intensity</div>
               {egrid === 'loading' || (selectedSite && egrid === null && egridAssessment?.key !== siteKey) ? (
                 <p className="panel__placeholder">Resolving eGRID subregion…</p>
@@ -560,9 +650,9 @@ export default function SiteAnalysisPanel() {
 
             <p className="state-report__hint">
               Regional/local scores (including H3 cell scores and the mock
-              power score) are MOCK / DEMO values. Flood risk, land cover,
-              grid carbon intensity, and transmission proximity are REAL
-              measurements.
+              power/water scores) are MOCK / DEMO values. Flood risk, land
+              cover, water stress, grid carbon intensity, and transmission
+              proximity are REAL measurements.
             </p>
           </div>
         ) : selectedStateId && (selectedCell || countyScore || stateScore) ? (

@@ -27,6 +27,12 @@ import {
   type FloodGeo,
 } from '../lib/flood'
 import {
+  loadAqueductData,
+  lookupWaterStress,
+  type WaterConstraint,
+  type WaterStressResult,
+} from '../lib/aqueduct'
+import {
   loadEgridData,
   lookupEgridSubregion,
   type EgridResult,
@@ -144,8 +150,20 @@ interface SiteStore {
     result: EgridResult | 'loading' | 'error'
   } | null
   assessSiteEgrid: (site: SelectedSite) => Promise<void>
+  /** REAL WRI Aqueduct 4.0 water stress for the current site. */
+  waterStressVisible: boolean
+  toggleWaterStress: () => void
+  waterAssessment: {
+    key: string
+    result: WaterStressResult | null | 'loading' | 'error'
+  } | null
+  assessSiteWater: (site: SelectedSite) => Promise<void>
   /** Hard-constraint preparation (not yet folded into overall scoring). */
-  siteConstraints: { flood: FloodConstraint; land: LandConstraint }
+  siteConstraints: {
+    flood: FloodConstraint
+    land: LandConstraint
+    water: WaterConstraint
+  }
 
   /** Raw state geometry (no scores) — source of truth for fitBounds. */
   statesGeo: StatesGeo | null
@@ -282,7 +300,35 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
       }))
     }
   },
-  siteConstraints: { flood: 'unknown', land: 'unknown' },
+  siteConstraints: { flood: 'unknown', land: 'unknown', water: 'unknown' },
+
+  waterStressVisible: false,
+  toggleWaterStress: () =>
+    set((prev) => ({ waterStressVisible: !prev.waterStressVisible })),
+  waterAssessment: null,
+  assessSiteWater: async (site) => {
+    const key = `${site.latitude.toFixed(5)},${site.longitude.toFixed(5)}`
+    if (get().waterAssessment?.key === key) return
+    set({ waterAssessment: { key, result: 'loading' } })
+    try {
+      const geo = await loadAqueductData()
+      if (get().waterAssessment?.key !== key) return
+      const result = lookupWaterStress(site, geo)
+      set((prev) => ({
+        waterAssessment: { key, result },
+        siteConstraints: {
+          ...prev.siteConstraints,
+          water: result?.constraint ?? 'unknown',
+        },
+      }))
+    } catch {
+      if (get().waterAssessment?.key !== key) return
+      set((prev) => ({
+        waterAssessment: { key, result: 'error' },
+        siteConstraints: { ...prev.siteConstraints, water: 'unknown' },
+      }))
+    }
+  },
 
   egridVisible: false,
   toggleEgrid: () => set((prev) => ({ egridVisible: !prev.egridVisible })),

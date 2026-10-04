@@ -23,6 +23,7 @@ import TransmissionLayer from './TransmissionLayer'
 import FloodLayer from './FloodLayer'
 import LandCoverLayer from './LandCoverLayer'
 import EgridLayer from './EgridLayer'
+import WaterStressLayer from './WaterStressLayer'
 import FloodDebug from './FloodDebug'
 import AnalysisRadius from './AnalysisRadius'
 import MapTooltip, { scoreRows, type TooltipInfo } from './MapTooltip'
@@ -460,6 +461,7 @@ export default function SiteMap() {
         <CountyLayer />
         <AnalysisRadius />
         <EgridLayer />
+        <WaterStressLayer />
         <LandCoverLayer />
         <FloodLayer />
         <FloodDebug />

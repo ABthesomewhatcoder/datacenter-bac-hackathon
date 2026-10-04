@@ -27,6 +27,8 @@ export default function ControlPanel() {
   const toggleLandCover = useSiteStore((s) => s.toggleLandCover)
   const egridVisible = useSiteStore((s) => s.egridVisible)
   const toggleEgrid = useSiteStore((s) => s.toggleEgrid)
+  const waterStressVisible = useSiteStore((s) => s.waterStressVisible)
+  const toggleWaterStress = useSiteStore((s) => s.toggleWaterStress)
 
   // In local and site modes the metric selector drives the H3 surface.
   const mode = getMapMode(zoom)
@@ -157,6 +159,22 @@ export default function ControlPanel() {
             aria-checked={egridVisible}
             aria-label="Toggle eGRID carbon intensity overlay"
             onClick={toggleEgrid}
+          >
+            <span className="toggle__thumb" />
+          </button>
+        </div>
+        <div className="toggle-row">
+          <div>
+            <div className="toggle-row__label">Water Stress</div>
+            <div className="toggle-row__sub">WRI Aqueduct 4.0 · real data</div>
+          </div>
+          <button
+            type="button"
+            className={`toggle${waterStressVisible ? ' toggle--on' : ''}`}
+            role="switch"
+            aria-checked={waterStressVisible}
+            aria-label="Toggle Aqueduct water stress overlay"
+            onClick={toggleWaterStress}
           >
             <span className="toggle__thumb" />
           </button>
