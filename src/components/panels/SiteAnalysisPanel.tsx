@@ -5,6 +5,7 @@ import {
   FLOOD_RISK_COLORS,
   FLOOD_RISK_LABELS,
 } from '../../lib/flood'
+import { NLCD_DATASET } from '../../lib/landCover'
 import {
   cellForLocation,
   getCellScore,
@@ -108,16 +109,25 @@ export default function SiteAnalysisPanel() {
   const transmissionByState = useSiteStore((s) => s.transmissionByState)
   const floodAssessment = useSiteStore((s) => s.floodAssessment)
   const assessSiteFlood = useSiteStore((s) => s.assessSiteFlood)
+  const landCoverAssessment = useSiteStore((s) => s.landCoverAssessment)
+  const assessSiteLandCover = useSiteStore((s) => s.assessSiteLandCover)
 
   useEffect(() => {
-    if (selectedSite) assessSiteFlood(selectedSite)
-  }, [selectedSite, assessSiteFlood])
+    if (selectedSite) {
+      assessSiteFlood(selectedSite)
+      assessSiteLandCover(selectedSite)
+    }
+  }, [selectedSite, assessSiteFlood, assessSiteLandCover])
 
   const siteKey = selectedSite
     ? `${selectedSite.latitude.toFixed(5)},${selectedSite.longitude.toFixed(5)}`
     : null
   const flood =
     siteKey && floodAssessment?.key === siteKey ? floodAssessment.result : null
+  const landCover =
+    siteKey && landCoverAssessment?.key === siteKey
+      ? landCoverAssessment.result
+      : null
 
   const transmissionData = countyViewStateId
     ? transmissionByState[countyViewStateId]
@@ -282,13 +292,65 @@ export default function SiteAnalysisPanel() {
                     value: countyScore?.buildability ?? null,
                     resolution: 'Regional estimate',
                   },
-                  {
-                    label: 'Land',
-                    value: siteCell?.landScore ?? null,
-                    resolution: 'Demo local estimate',
-                  },
                 ]}
               />
+            </div>
+
+            <div>
+              <div className="panel__subheading">Land Cover</div>
+              {landCover === 'loading' || (selectedSite && !landCover) ? (
+                <p className="panel__placeholder">Querying USGS NLCD…</p>
+              ) : landCover === 'error' ? (
+                <>
+                  <div className="site-facts">
+                    <div className="site-fact">
+                      <span>Land Cover</span>
+                      <span>UNKNOWN</span>
+                    </div>
+                    <div className="site-fact">
+                      <span>Source</span>
+                      <span>{NLCD_DATASET.source}</span>
+                    </div>
+                  </div>
+                  <p className="state-report__hint">
+                    USGS land-cover data temporarily unavailable
+                  </p>
+                </>
+              ) : landCover ? (
+                <>
+                  <div className="site-facts">
+                    <div className="site-fact">
+                      <span>Land Cover</span>
+                      <span>{landCover.className}</span>
+                    </div>
+                    <div className="site-fact">
+                      <span>NLCD Class</span>
+                      <span className="mono">{landCover.classCode}</span>
+                    </div>
+                    <div className="site-fact">
+                      <span>Mapping year</span>
+                      <span>{landCover.year}</span>
+                    </div>
+                    <div className="site-fact">
+                      <span>Constraint</span>
+                      <span className="mono">
+                        {landCover.constraint.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="site-fact">
+                      <span>Resolution</span>
+                      <span>{landCover.resolution}</span>
+                    </div>
+                    <div className="site-fact">
+                      <span>Source</span>
+                      <span>
+                        {landCover.source} · {NLCD_DATASET.dataStatus}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="state-report__hint">{NLCD_DATASET.caveat}</p>
+                </>
+              ) : null}
             </div>
 
             <div>
@@ -401,8 +463,9 @@ export default function SiteAnalysisPanel() {
             </div>
 
             <p className="state-report__hint">
-              Regional/local scores are MOCK / DEMO values. Flood risk and
-              transmission proximity are the only REAL measurements here.
+              Regional/local scores (including H3 land/flood cell scores)
+              are MOCK / DEMO values. Flood risk, land cover, and
+              transmission proximity are REAL measurements.
             </p>
           </div>
         ) : selectedStateId && (selectedCell || countyScore || stateScore) ? (

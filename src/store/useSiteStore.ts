@@ -27,6 +27,11 @@ import {
   type FloodGeo,
 } from '../lib/flood'
 import {
+  fetchLandCover,
+  type LandConstraint,
+  type LandCoverResult,
+} from '../lib/landCover'
+import {
   boundsContainBounds,
   boundsContainPoint,
   expandBounds,
@@ -118,8 +123,16 @@ interface SiteStore {
     result: FloodAssessment | 'loading'
   } | null
   assessSiteFlood: (site: SelectedSite) => Promise<void>
+  /** REAL USGS NLCD land cover for the current site. */
+  landCoverVisible: boolean
+  toggleLandCover: () => void
+  landCoverAssessment: {
+    key: string
+    result: LandCoverResult | 'loading' | 'error'
+  } | null
+  assessSiteLandCover: (site: SelectedSite) => Promise<void>
   /** Hard-constraint preparation (not yet folded into overall scoring). */
-  siteConstraints: { flood: FloodConstraint }
+  siteConstraints: { flood: FloodConstraint; land: LandConstraint }
 
   /** Raw state geometry (no scores) — source of truth for fitBounds. */
   statesGeo: StatesGeo | null
@@ -223,7 +236,10 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
     const zones = get().floodZones
     if (zones && boundsContainPoint(zones.bounds, site.longitude, site.latitude)) {
       const result = assessFloodRiskLocal(site, zones.fc)
-      set({ floodAssessment: { key, result }, siteConstraints: { flood: result.constraint } })
+      set((prev) => ({
+        floodAssessment: { key, result },
+        siteConstraints: { ...prev.siteConstraints, flood: result.constraint },
+      }))
       return
     }
 
@@ -231,7 +247,10 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
     try {
       const result = await assessFloodRisk(site)
       if (get().floodAssessment?.key !== key) return // site moved meanwhile
-      set({ floodAssessment: { key, result }, siteConstraints: { flood: result.constraint } })
+      set((prev) => ({
+        floodAssessment: { key, result },
+        siteConstraints: { ...prev.siteConstraints, flood: result.constraint },
+      }))
     } catch {
       if (get().floodAssessment?.key !== key) return
       const result: FloodAssessment = {
@@ -244,10 +263,38 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
         source: 'FEMA NFHL',
         resolution: 'FEMA query failed / service unavailable',
       }
-      set({ floodAssessment: { key, result }, siteConstraints: { flood: 'unknown' } })
+      set((prev) => ({
+        floodAssessment: { key, result },
+        siteConstraints: { ...prev.siteConstraints, flood: 'unknown' },
+      }))
     }
   },
-  siteConstraints: { flood: 'unknown' },
+  siteConstraints: { flood: 'unknown', land: 'unknown' },
+
+  landCoverVisible: false,
+  toggleLandCover: () =>
+    set((prev) => ({ landCoverVisible: !prev.landCoverVisible })),
+  landCoverAssessment: null,
+  assessSiteLandCover: async (site) => {
+    const key = `${site.latitude.toFixed(5)},${site.longitude.toFixed(5)}`
+    if (get().landCoverAssessment?.key === key) return
+    set({ landCoverAssessment: { key, result: 'loading' } })
+    try {
+      const result = await fetchLandCover(site)
+      if (get().landCoverAssessment?.key !== key) return
+      set((prev) => ({
+        landCoverAssessment: { key, result },
+        siteConstraints: { ...prev.siteConstraints, land: result.constraint },
+      }))
+    } catch {
+      if (get().landCoverAssessment?.key !== key) return
+      // Never fabricate a class — surface UNKNOWN.
+      set((prev) => ({
+        landCoverAssessment: { key, result: 'error' },
+        siteConstraints: { ...prev.siteConstraints, land: 'unknown' },
+      }))
+    }
+  },
 
   transmissionVisible: true,
   toggleTransmission: () =>

@@ -23,6 +23,8 @@ export default function ControlPanel() {
   const toggleFlood = useSiteStore((s) => s.toggleFlood)
   const floodZonesLoading = useSiteStore((s) => s.floodZonesLoading)
   const floodError = useSiteStore((s) => s.floodError)
+  const landCoverVisible = useSiteStore((s) => s.landCoverVisible)
+  const toggleLandCover = useSiteStore((s) => s.toggleLandCover)
 
   // In local and site modes the metric selector drives the H3 surface.
   const mode = getMapMode(zoom)
@@ -121,6 +123,22 @@ export default function ControlPanel() {
             aria-checked={floodVisible}
             aria-label="Toggle FEMA flood hazard zones"
             onClick={toggleFlood}
+          >
+            <span className="toggle__thumb" />
+          </button>
+        </div>
+        <div className="toggle-row">
+          <div>
+            <div className="toggle-row__label">Land Cover</div>
+            <div className="toggle-row__sub">USGS NLCD 2025 · real data · local zoom</div>
+          </div>
+          <button
+            type="button"
+            className={`toggle${landCoverVisible ? ' toggle--on' : ''}`}
+            role="switch"
+            aria-checked={landCoverVisible}
+            aria-label="Toggle NLCD land cover overlay"
+            onClick={toggleLandCover}
           >
             <span className="toggle__thumb" />
           </button>

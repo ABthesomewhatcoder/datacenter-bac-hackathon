@@ -21,6 +21,7 @@ import H3SuitabilityLayer, { type H3HoverInfo } from './H3SuitabilityLayer'
 import SiteMarker from './SiteMarker'
 import TransmissionLayer from './TransmissionLayer'
 import FloodLayer from './FloodLayer'
+import LandCoverLayer from './LandCoverLayer'
 import FloodDebug from './FloodDebug'
 import AnalysisRadius from './AnalysisRadius'
 import MapTooltip, { scoreRows, type TooltipInfo } from './MapTooltip'
@@ -457,6 +458,7 @@ export default function SiteMap() {
         <StateLayer />
         <CountyLayer />
         <AnalysisRadius />
+        <LandCoverLayer />
         <FloodLayer />
         <FloodDebug />
         <TransmissionLayer />
