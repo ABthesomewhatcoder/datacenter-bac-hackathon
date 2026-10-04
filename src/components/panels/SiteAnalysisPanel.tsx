@@ -21,6 +21,7 @@ import {
 import FacilitySimulator from './FacilitySimulator'
 import PowerGridContext from './PowerGridContext'
 import RegulatoryContext from './RegulatoryContext'
+import ProjectConfiguration from './ProjectConfiguration'
 import SiteScoreCard from './SiteScoreCard'
 import TopRegionalCandidates from './TopRegionalCandidates'
 import {
@@ -808,6 +809,7 @@ export default function SiteAnalysisPanel() {
           </div>
         ) : (
           <>
+            <ProjectConfiguration />
             <TopRegionalCandidates />
             <div className="empty-state empty-state--compact">
               <p className="empty-state__hint">

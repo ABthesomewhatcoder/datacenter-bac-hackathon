@@ -1226,3 +1226,19 @@ body,
   font-size: 10.5px;
   color: var(--text-muted);
 }
+
+/* ---------- Project configuration (national screen) ---------- */
+
+.project-config {
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(240, 246, 252, 0.08);
+}
+
+.project-config__row {
+  margin-bottom: 6px;
+}
+
+.project-config__hint {
+  color: var(--accent);
+}

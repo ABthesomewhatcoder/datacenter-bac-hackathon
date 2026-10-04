@@ -79,12 +79,16 @@ export default function ControlPanel() {
             ))}
           </div>
         ) : (
+          // Submission view: only the REAL Regional Opportunity metric is
+          // exposed nationally. The mock Power/Water/Buildability metric
+          // tabs are hidden (not deleted) until they are backed by real
+          // P2 data — never show an unlabeled mock metric.
           <div
-            className="segmented segmented--grid"
+            className="segmented"
             role="group"
             aria-label="Suitability metric"
           >
-            {METRICS.map(({ id, label }) => (
+            {METRICS.filter(({ id }) => id === 'overall').map(({ id }) => (
               <button
                 key={id}
                 type="button"
@@ -92,7 +96,7 @@ export default function ControlPanel() {
                 aria-pressed={activeMetric === id}
                 onClick={() => setActiveMetric(id)}
               >
-                {label}
+                Regional Opportunity
               </button>
             ))}
           </div>
