@@ -18,6 +18,7 @@ import {
   nearestTransmissionLine,
   TRANSMISSION_DATASET,
 } from '../../lib/transmission'
+import FacilitySimulator from './FacilitySimulator'
 import {
   RADIUS_OPTIONS_MILES,
   useSiteStore,
@@ -647,6 +648,11 @@ export default function SiteAnalysisPanel() {
                 {TRANSMISSION_DATASET.caveat}
               </p>
             </div>
+
+            <FacilitySimulator
+              nearestLine={nearestLine}
+              transmissionMissing={transmissionData === 'missing'}
+            />
 
             <p className="state-report__hint">
               Regional/local scores (including H3 cell scores and the mock

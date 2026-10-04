@@ -27,6 +27,12 @@ import {
   type FloodGeo,
 } from '../lib/flood'
 import {
+  DEFAULT_IT_CAPACITY_MW,
+  DEFAULT_PUE,
+  DEFAULT_WUE,
+  type SimulationInputs,
+} from '../lib/simulation'
+import {
   loadAqueductData,
   lookupWaterStress,
   type WaterConstraint,
@@ -158,6 +164,9 @@ interface SiteStore {
     result: WaterStressResult | null | 'loading' | 'error'
   } | null
   assessSiteWater: (site: SelectedSite) => Promise<void>
+  /** Facility simulator scenario inputs (persist across sites). */
+  simulationInputs: SimulationInputs
+  setSimulationInputs: (inputs: Partial<SimulationInputs>) => void
   /** Hard-constraint preparation (not yet folded into overall scoring). */
   siteConstraints: {
     flood: FloodConstraint
@@ -301,6 +310,16 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
     }
   },
   siteConstraints: { flood: 'unknown', land: 'unknown', water: 'unknown' },
+
+  simulationInputs: {
+    itLoadMW: DEFAULT_IT_CAPACITY_MW,
+    pue: DEFAULT_PUE,
+    wueLPerKwh: DEFAULT_WUE,
+  },
+  setSimulationInputs: (inputs) =>
+    set((prev) => ({
+      simulationInputs: { ...prev.simulationInputs, ...inputs },
+    })),
 
   waterStressVisible: false,
   toggleWaterStress: () =>

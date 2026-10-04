@@ -745,3 +745,80 @@ body,
   border-radius: 6px;
   pointer-events: none;
 }
+
+/* ---------- Facility simulator ---------- */
+
+.tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.tag--scenario {
+  color: #e9c23f;
+  border: 1px solid rgba(233, 194, 63, 0.45);
+  background: rgba(233, 194, 63, 0.1);
+}
+
+.tag--real {
+  color: var(--accent);
+  border: 1px solid rgba(53, 194, 201, 0.45);
+  background: rgba(53, 194, 201, 0.1);
+}
+
+.sim-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.sim-input__label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.sim-input__segmented {
+  grid-template-columns: 1fr 1fr 1fr 1.2fr;
+}
+
+.num-input {
+  appearance: none;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 6px;
+  font: inherit;
+  font-size: 12px;
+  text-align: center;
+  color: var(--text);
+  background: transparent;
+  min-width: 0;
+}
+
+.num-input::placeholder {
+  color: var(--text-muted);
+}
+
+.num-input--active {
+  background: var(--accent);
+  color: #06282a;
+  font-weight: 600;
+}
+
+.num-input:focus {
+  outline: 1px solid var(--accent);
+}
+
+.sim-note {
+  margin: 6px 0 14px;
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
