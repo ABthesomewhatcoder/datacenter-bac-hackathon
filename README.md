@@ -41,6 +41,7 @@ Every metric in the app is explicitly labeled. The split today:
 | Transmission lines + nearest-line proximity | ✅ **REAL** | HIFLD, all 48 contiguous states + DC |
 | State/county geometry | ✅ **REAL** | U.S. Census |
 | Facility-simulator outputs | ✅ **REAL formulas** | DOE/EPA/Microsoft methodology; carbon uses the site's real eGRID rate. IT capacity, PUE, and WUE are user **scenario assumptions**, labeled as such in the UI |
+| Regulatory / moratorium activity | ✅ **REAL** | Moratorium Nation 2026 snapshot (through 2026-09-23); record coordinates are jurisdiction **centroids** — proximity is discovery context, never legal applicability |
 | State suitability scores (nationwide choropleth) | ⚠️ **MOCK** | Synthetic demo values (`state_scores.json`) |
 | County suitability scores | ⚠️ **MOCK** | Synthetic demo values (`county_scores.json`) |
 | H3 cell scores + local power/water scores | ⚠️ **MOCK** | Synthetic demo values for prototyping the drilldown flow |
@@ -144,6 +145,20 @@ official USGS/MRLC GeoServer WMS — no key required.
 
 2010 cartographic boundaries (20m), preprocessed by
 `scripts/prepare-states.mjs` / `scripts/prepare-counties.mjs`.
+
+### Moratorium Nation 2026 (regulatory / moratorium intelligence)
+
+Local data-center moratorium inventory + state policy tracker by
+Michael J. Bommarito. Data CC BY 4.0, code MIT; snapshot **current through
+September 23, 2026** — not live legislative monitoring. Preprocessed by
+`scripts/prepare-regulatory-data.mjs`, committed in `public/data/regulatory/`.
+Record coordinates are jurisdiction centroids; centroid proximity never
+establishes that a site is legally subject to a moratorium.
+
+- <https://github.com/mjbommar/moratorium-data-2026>
+- <https://raw.githubusercontent.com/mjbommar/moratorium-data-2026/main/data/moratorium_inventory.csv>
+- <https://raw.githubusercontent.com/mjbommar/moratorium-data-2026/main/data/state_legislation.csv>
+- Paper: <https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6242898>
 
 ### Facility-simulator methodology
 

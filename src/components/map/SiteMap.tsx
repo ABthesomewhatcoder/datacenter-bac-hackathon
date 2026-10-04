@@ -23,6 +23,7 @@ import TransmissionLayer from './TransmissionLayer'
 import FloodLayer from './FloodLayer'
 import LandCoverLayer from './LandCoverLayer'
 import EgridLayer from './EgridLayer'
+import RegulatoryLayer, { REGULATORY_MARKER_LAYER_ID } from './RegulatoryLayer'
 import WaterStressLayer from './WaterStressLayer'
 import FloodDebug from './FloodDebug'
 import AnalysisRadius from './AnalysisRadius'
@@ -279,6 +280,17 @@ export default function SiteMap() {
 
   const handleClick = useCallback(
     (evt: MapMouseEvent) => {
+      // A regulatory-marker click opens its own popup (handled inside
+      // RegulatoryLayer) — don't also drill down or move the site pin.
+      const mapbox = mapRef.current?.getMap()
+      if (
+        mapbox?.getLayer(REGULATORY_MARKER_LAYER_ID) &&
+        mapbox.queryRenderedFeatures(evt.point, {
+          layers: [REGULATORY_MARKER_LAYER_ID],
+        }).length > 0
+      ) {
+        return
+      }
       if (siteActive) {
         // Exact placement: use the raw click coordinate, nothing H3-based.
         setSelectedSite({
@@ -462,6 +474,7 @@ export default function SiteMap() {
         <AnalysisRadius />
         <EgridLayer />
         <WaterStressLayer />
+        <RegulatoryLayer />
         <LandCoverLayer />
         <FloodLayer />
         <FloodDebug />

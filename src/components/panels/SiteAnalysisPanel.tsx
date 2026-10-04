@@ -19,6 +19,7 @@ import {
   TRANSMISSION_DATASET,
 } from '../../lib/transmission'
 import FacilitySimulator from './FacilitySimulator'
+import RegulatoryContext from './RegulatoryContext'
 import {
   RADIUS_OPTIONS_MILES,
   useSiteStore,
@@ -118,6 +119,7 @@ export default function SiteAnalysisPanel() {
   const assessSiteEgrid = useSiteStore((s) => s.assessSiteEgrid)
   const waterAssessment = useSiteStore((s) => s.waterAssessment)
   const assessSiteWater = useSiteStore((s) => s.assessSiteWater)
+  const assessSiteRegulatory = useSiteStore((s) => s.assessSiteRegulatory)
 
   useEffect(() => {
     if (selectedSite) {
@@ -125,6 +127,7 @@ export default function SiteAnalysisPanel() {
       assessSiteLandCover(selectedSite)
       assessSiteEgrid(selectedSite)
       assessSiteWater(selectedSite)
+      assessSiteRegulatory(selectedSite)
     }
   }, [
     selectedSite,
@@ -132,6 +135,7 @@ export default function SiteAnalysisPanel() {
     assessSiteLandCover,
     assessSiteEgrid,
     assessSiteWater,
+    assessSiteRegulatory,
   ])
 
   const siteKey = selectedSite
@@ -653,6 +657,8 @@ export default function SiteAnalysisPanel() {
               nearestLine={nearestLine}
               transmissionMissing={transmissionData === 'missing'}
             />
+
+            <RegulatoryContext />
 
             <p className="state-report__hint">
               Regional/local scores (including H3 cell scores and the mock

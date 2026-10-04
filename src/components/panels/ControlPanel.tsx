@@ -29,6 +29,8 @@ export default function ControlPanel() {
   const toggleEgrid = useSiteStore((s) => s.toggleEgrid)
   const waterStressVisible = useSiteStore((s) => s.waterStressVisible)
   const toggleWaterStress = useSiteStore((s) => s.toggleWaterStress)
+  const regulatoryVisible = useSiteStore((s) => s.regulatoryVisible)
+  const toggleRegulatory = useSiteStore((s) => s.toggleRegulatory)
 
   // In local and site modes the metric selector drives the H3 surface.
   const mode = getMapMode(zoom)
@@ -175,6 +177,24 @@ export default function ControlPanel() {
             aria-checked={waterStressVisible}
             aria-label="Toggle Aqueduct water stress overlay"
             onClick={toggleWaterStress}
+          >
+            <span className="toggle__thumb" />
+          </button>
+        </div>
+        <div className="toggle-row">
+          <div>
+            <div className="toggle-row__label">Regulatory Activity</div>
+            <div className="toggle-row__sub">
+              Moratorium Nation 2026 · real data · thru 2026-09-23
+            </div>
+          </div>
+          <button
+            type="button"
+            className={`toggle${regulatoryVisible ? ' toggle--on' : ''}`}
+            role="switch"
+            aria-checked={regulatoryVisible}
+            aria-label="Toggle data-center regulatory activity overlay"
+            onClick={toggleRegulatory}
           >
             <span className="toggle__thumb" />
           </button>

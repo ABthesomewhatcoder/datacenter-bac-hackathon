@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "test:sim": "node --experimental-strip-types scripts/test-simulation.ts",
+    "test:reg": "node --experimental-strip-types scripts/test-regulatory.ts",
     "preview": "vite preview"
   },
   "dependencies": {

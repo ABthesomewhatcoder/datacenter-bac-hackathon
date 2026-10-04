@@ -49,9 +49,19 @@ import {
   type LandCoverResult,
 } from '../lib/landCover'
 import {
+  assessRegulatoryActivity,
+  findNearbyActivity,
+  loadRegulatoryData,
+  statePoliciesFor,
+  type NearbyActivity,
+  type RegulatoryActivityIndicator,
+  type StatePolicyAction,
+} from '../lib/regulatory'
+import {
   boundsContainBounds,
   boundsContainPoint,
   expandBounds,
+  featureContains,
   type LngLatBounds,
 } from '../lib/geo'
 
@@ -85,6 +95,19 @@ export interface MapViewState {
 export interface SelectedSite {
   latitude: number
   longitude: number
+}
+
+/**
+ * Site regulatory context: state-level policy is valid (the state is
+ * known), while nearby local records are centroid-distance DISCOVERY
+ * context only — never legal applicability.
+ */
+export interface RegulatoryContext {
+  stateAbbrev: string | null
+  stateName: string | null
+  nearby: NearbyActivity
+  statePolicies: StatePolicyAction[]
+  indicator: RegulatoryActivityIndicator
 }
 
 export const RADIUS_OPTIONS_MILES = [5, 10, 25, 50]
@@ -167,6 +190,14 @@ interface SiteStore {
   /** Facility simulator scenario inputs (persist across sites). */
   simulationInputs: SimulationInputs
   setSimulationInputs: (inputs: Partial<SimulationInputs>) => void
+  /** REAL Moratorium Nation 2026 regulatory context for the current site. */
+  regulatoryVisible: boolean
+  toggleRegulatory: () => void
+  regulatoryAssessment: {
+    key: string
+    result: RegulatoryContext | 'loading' | 'error'
+  } | null
+  assessSiteRegulatory: (site: SelectedSite) => Promise<void>
   /** Hard-constraint preparation (not yet folded into overall scoring). */
   siteConstraints: {
     flood: FloodConstraint
@@ -320,6 +351,41 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
     set((prev) => ({
       simulationInputs: { ...prev.simulationInputs, ...inputs },
     })),
+
+  regulatoryVisible: false,
+  toggleRegulatory: () =>
+    set((prev) => ({ regulatoryVisible: !prev.regulatoryVisible })),
+  regulatoryAssessment: null,
+  assessSiteRegulatory: async (site) => {
+    const key = `${site.latitude.toFixed(5)},${site.longitude.toFixed(5)}`
+    if (get().regulatoryAssessment?.key === key) return
+    set({ regulatoryAssessment: { key, result: 'loading' } })
+    try {
+      const data = await loadRegulatoryData()
+      if (get().regulatoryAssessment?.key !== key) return
+      // State membership via point-in-polygon on state geometry — valid,
+      // unlike centroid proximity, which stays discovery-only context.
+      const stateFeature = get().statesGeo?.features.find((f) =>
+        featureContains(f, site.longitude, site.latitude),
+      )
+      const stateAbbrev = stateFeature?.properties.id ?? null
+      const nearby = findNearbyActivity(site, data.moratoria)
+      const statePolicies = stateAbbrev
+        ? statePoliciesFor(stateAbbrev, data.statePolicy)
+        : []
+      const result: RegulatoryContext = {
+        stateAbbrev,
+        stateName: stateFeature?.properties.name ?? null,
+        nearby,
+        statePolicies,
+        indicator: assessRegulatoryActivity(nearby, statePolicies),
+      }
+      set({ regulatoryAssessment: { key, result } })
+    } catch {
+      if (get().regulatoryAssessment?.key !== key) return
+      set({ regulatoryAssessment: { key, result: 'error' } })
+    }
+  },
 
   waterStressVisible: false,
   toggleWaterStress: () =>
