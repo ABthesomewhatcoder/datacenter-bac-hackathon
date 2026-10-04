@@ -1,0 +1,17 @@
+{
+  "dataset": "eGRID2023 Revision 2 (released June 12, 2025)",
+  "sourceOrganization": "U.S. EPA",
+  "dataStatus": "REAL DATA",
+  "fields": {
+    "co2RateLb": "SRCO2RTA — CO2 total output emission rate (lb/MWh)",
+    "co2eRateLb": "SRC2ERTA — CO2e total output emission rate (lb/MWh)",
+    "gridGrossLoss": "GGL23 GGRSLOSS by interconnect (fraction)"
+  },
+  "note": "Total output emission rates (not non-baseload) — appropriate for electricity-footprint estimates.",
+  "sources": [
+    "https://www.epa.gov/system/files/other-files/2025-01/egrid2023_subregions.zip",
+    "https://www.epa.gov/system/files/other-files/2025-01/egrid2023_multiple_subregions.zip",
+    "https://www.epa.gov/system/files/documents/2025-06/egrid2023_data_rev2.xlsx"
+  ],
+  "generated": "2026-10-04"
+}

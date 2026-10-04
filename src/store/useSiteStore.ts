@@ -27,6 +27,11 @@ import {
   type FloodGeo,
 } from '../lib/flood'
 import {
+  loadEgridData,
+  lookupEgridSubregion,
+  type EgridResult,
+} from '../lib/egrid'
+import {
   fetchLandCover,
   type LandConstraint,
   type LandCoverResult,
@@ -131,6 +136,14 @@ interface SiteStore {
     result: LandCoverResult | 'loading' | 'error'
   } | null
   assessSiteLandCover: (site: SelectedSite) => Promise<void>
+  /** REAL EPA eGRID2023 grid carbon intensity for the current site. */
+  egridVisible: boolean
+  toggleEgrid: () => void
+  egridAssessment: {
+    key: string
+    result: EgridResult | 'loading' | 'error'
+  } | null
+  assessSiteEgrid: (site: SelectedSite) => Promise<void>
   /** Hard-constraint preparation (not yet folded into overall scoring). */
   siteConstraints: { flood: FloodConstraint; land: LandConstraint }
 
@@ -270,6 +283,23 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
     }
   },
   siteConstraints: { flood: 'unknown', land: 'unknown' },
+
+  egridVisible: false,
+  toggleEgrid: () => set((prev) => ({ egridVisible: !prev.egridVisible })),
+  egridAssessment: null,
+  assessSiteEgrid: async (site) => {
+    const key = `${site.latitude.toFixed(5)},${site.longitude.toFixed(5)}`
+    if (get().egridAssessment?.key === key) return
+    set({ egridAssessment: { key, result: 'loading' } })
+    try {
+      const data = await loadEgridData()
+      if (get().egridAssessment?.key !== key) return
+      set({ egridAssessment: { key, result: lookupEgridSubregion(site, data) } })
+    } catch {
+      if (get().egridAssessment?.key !== key) return
+      set({ egridAssessment: { key, result: 'error' } })
+    }
+  },
 
   landCoverVisible: false,
   toggleLandCover: () =>

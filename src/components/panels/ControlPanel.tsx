@@ -25,6 +25,8 @@ export default function ControlPanel() {
   const floodError = useSiteStore((s) => s.floodError)
   const landCoverVisible = useSiteStore((s) => s.landCoverVisible)
   const toggleLandCover = useSiteStore((s) => s.toggleLandCover)
+  const egridVisible = useSiteStore((s) => s.egridVisible)
+  const toggleEgrid = useSiteStore((s) => s.toggleEgrid)
 
   // In local and site modes the metric selector drives the H3 surface.
   const mode = getMapMode(zoom)
@@ -139,6 +141,22 @@ export default function ControlPanel() {
             aria-checked={landCoverVisible}
             aria-label="Toggle NLCD land cover overlay"
             onClick={toggleLandCover}
+          >
+            <span className="toggle__thumb" />
+          </button>
+        </div>
+        <div className="toggle-row">
+          <div>
+            <div className="toggle-row__label">Grid Carbon</div>
+            <div className="toggle-row__sub">EPA eGRID2023 · real data</div>
+          </div>
+          <button
+            type="button"
+            className={`toggle${egridVisible ? ' toggle--on' : ''}`}
+            role="switch"
+            aria-checked={egridVisible}
+            aria-label="Toggle eGRID carbon intensity overlay"
+            onClick={toggleEgrid}
           >
             <span className="toggle__thumb" />
           </button>

@@ -5,6 +5,7 @@ import {
   FLOOD_RISK_COLORS,
   FLOOD_RISK_LABELS,
 } from '../../lib/flood'
+import { EGRID_DATASET } from '../../lib/egrid'
 import { NLCD_DATASET } from '../../lib/landCover'
 import {
   cellForLocation,
@@ -111,13 +112,16 @@ export default function SiteAnalysisPanel() {
   const assessSiteFlood = useSiteStore((s) => s.assessSiteFlood)
   const landCoverAssessment = useSiteStore((s) => s.landCoverAssessment)
   const assessSiteLandCover = useSiteStore((s) => s.assessSiteLandCover)
+  const egridAssessment = useSiteStore((s) => s.egridAssessment)
+  const assessSiteEgrid = useSiteStore((s) => s.assessSiteEgrid)
 
   useEffect(() => {
     if (selectedSite) {
       assessSiteFlood(selectedSite)
       assessSiteLandCover(selectedSite)
+      assessSiteEgrid(selectedSite)
     }
-  }, [selectedSite, assessSiteFlood, assessSiteLandCover])
+  }, [selectedSite, assessSiteFlood, assessSiteLandCover, assessSiteEgrid])
 
   const siteKey = selectedSite
     ? `${selectedSite.latitude.toFixed(5)},${selectedSite.longitude.toFixed(5)}`
@@ -128,6 +132,8 @@ export default function SiteAnalysisPanel() {
     siteKey && landCoverAssessment?.key === siteKey
       ? landCoverAssessment.result
       : null
+  const egrid =
+    siteKey && egridAssessment?.key === siteKey ? egridAssessment.result : null
 
   const transmissionData = countyViewStateId
     ? transmissionByState[countyViewStateId]
@@ -354,6 +360,96 @@ export default function SiteAnalysisPanel() {
             </div>
 
             <div>
+              <div className="panel__subheading">Grid Carbon Intensity</div>
+              {egrid === 'loading' || (selectedSite && egrid === null && egridAssessment?.key !== siteKey) ? (
+                <p className="panel__placeholder">Resolving eGRID subregion…</p>
+              ) : egrid === 'error' ? (
+                <p className="panel__placeholder">
+                  EPA eGRID data temporarily unavailable
+                </p>
+              ) : egrid ? (
+                egrid.ambiguous ? (
+                  <>
+                    <div className="site-facts">
+                      <div className="site-fact">
+                        <span>eGRID Subregion</span>
+                        <span>Multiple possible eGRID subregions</span>
+                      </div>
+                      {egrid.candidates.map((c) => (
+                        <div className="site-fact" key={c.acronym}>
+                          <span className="mono">{c.acronym}</span>
+                          <span>
+                            {c.co2eRateLb !== null
+                              ? `${c.co2eRateLb.toFixed(0)} lb CO2e/MWh`
+                              : '—'}
+                          </span>
+                        </div>
+                      ))}
+                      <div className="site-fact">
+                        <span>Source</span>
+                        <span>
+                          {EGRID_DATASET.source} · {EGRID_DATASET.dataStatus}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="state-report__hint">
+                      {EGRID_DATASET.ambiguousNote}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="site-facts">
+                      <div className="site-fact">
+                        <span>Grid Carbon Intensity</span>
+                        <span>
+                          {egrid.co2eRateLb !== null
+                            ? `${egrid.co2eRateLb.toFixed(0)} lb CO2e/MWh`
+                            : 'Unknown'}
+                        </span>
+                      </div>
+                      <div className="site-fact">
+                        <span>Converted</span>
+                        <span>
+                          {egrid.co2eRateKg !== null
+                            ? `${egrid.co2eRateKg.toFixed(0)} kg CO2e/MWh`
+                            : '—'}
+                        </span>
+                      </div>
+                      <div className="site-fact">
+                        <span>eGRID Subregion</span>
+                        <span>
+                          <span className="mono">{egrid.acronym}</span> ·{' '}
+                          {egrid.name}
+                        </span>
+                      </div>
+                      {egrid.gridGrossLoss !== null && (
+                        <div className="site-fact">
+                          <span>Grid gross loss</span>
+                          <span>{(egrid.gridGrossLoss * 100).toFixed(1)}%</span>
+                        </div>
+                      )}
+                      <div className="site-fact">
+                        <span>Resolution</span>
+                        <span>{EGRID_DATASET.resolution}</span>
+                      </div>
+                      <div className="site-fact">
+                        <span>Source</span>
+                        <span>
+                          {EGRID_DATASET.source} · {EGRID_DATASET.dataStatus}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="state-report__hint">{EGRID_DATASET.caveat}</p>
+                  </>
+                )
+              ) : selectedSite ? (
+                <p className="panel__placeholder">
+                  Outside eGRID subregion coverage
+                </p>
+              ) : null}
+            </div>
+
+            <div>
               <div className="panel__subheading">Flood Risk</div>
               {flood === 'loading' || (selectedSite && !flood) ? (
                 <p className="panel__placeholder">Querying FEMA NFHL…</p>
@@ -463,9 +559,10 @@ export default function SiteAnalysisPanel() {
             </div>
 
             <p className="state-report__hint">
-              Regional/local scores (including H3 land/flood cell scores)
-              are MOCK / DEMO values. Flood risk, land cover, and
-              transmission proximity are REAL measurements.
+              Regional/local scores (including H3 cell scores and the mock
+              power score) are MOCK / DEMO values. Flood risk, land cover,
+              grid carbon intensity, and transmission proximity are REAL
+              measurements.
             </p>
           </div>
         ) : selectedStateId && (selectedCell || countyScore || stateScore) ? (
