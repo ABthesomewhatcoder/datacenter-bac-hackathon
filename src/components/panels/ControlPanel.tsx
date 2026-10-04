@@ -225,7 +225,9 @@ export default function ControlPanel() {
           </div>
         </div>
         <p className="panel__placeholder">
-          Demo scores — synthetic data for prototyping.
+          Overall = REGIONAL SCREENING · REAL DATA (Regional Opportunity
+          Score for the current facility and priority profile).
+          Power/Water/Buildability remain demo mock scores.
         </p>
         {stateDataError && (
           <p className="panel__error">State data failed to load: {stateDataError}</p>

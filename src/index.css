@@ -1114,3 +1114,98 @@ body,
 .score-card__list--risk li::marker {
   color: #ee6c4d;
 }
+
+/* ---------- P2 Top Regional Candidates ---------- */
+
+.regional-panel {
+  margin-bottom: 10px;
+}
+
+.regional-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.regional-row {
+  border-bottom: 1px solid rgba(240, 246, 252, 0.06);
+  padding-bottom: 5px;
+}
+
+.regional-row__main {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 5px 0 1px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.regional-row__main:hover .regional-row__name {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.regional-row__rank {
+  color: var(--text-muted);
+  font-size: 11px;
+  min-width: 18px;
+}
+
+.regional-row__name {
+  flex: 1;
+  min-width: 0;
+}
+
+.regional-row__score {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.regional-row__pillars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  padding-left: 25px;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.regional-row__conf {
+  margin-left: auto;
+}
+
+.regional-row__why {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 10px;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.regional-row__reasons {
+  margin: 4px 0 2px;
+  padding-left: 25px;
+  list-style: none;
+  font-size: 10.5px;
+}
+
+.regional-reason--good {
+  color: #7fbf4d;
+}
+
+.regional-reason--risk {
+  color: #ee6c4d;
+}
+
+.empty-state--compact {
+  padding: 8px 0 0;
+}

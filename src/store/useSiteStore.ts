@@ -50,6 +50,13 @@ import {
 } from '../lib/landCover'
 import type { PriorityProfileId } from '../lib/decisionEngine'
 import {
+  loadRegionalEvidence,
+  scoreAllCounties,
+  stateMedians,
+  type RegionalCountyScore,
+  type RegionalEvidenceFile,
+} from '../lib/regionalScreening'
+import {
   assessRegulatoryActivity,
   findNearbyActivity,
   loadRegulatoryData,
@@ -197,6 +204,17 @@ interface SiteStore {
   /** Decision priority profile — controls pillar WEIGHTS only. */
   priorityProfile: PriorityProfileId
   setPriorityProfile: (profile: PriorityProfileId) => void
+
+  /** P2 nationwide regional screening (REAL evidence, CONUS counties). */
+  regionalEvidence: RegionalEvidenceFile | null
+  regionalScores: RegionalCountyScore[] | null
+  regionalScoreByFips: Record<string, number>
+  regionalStateMedians: Record<string, number>
+  ensureRegionalEvidence: () => Promise<void>
+  /** Jump target set by the Top Regional Candidates list. */
+  focusCountyFips: string | null
+  focusCounty: (state: string, fips: string) => void
+  clearFocusCounty: () => void
   /** REAL Moratorium Nation 2026 regulatory context for the current site. */
   regulatoryVisible: boolean
   toggleRegulatory: () => void
@@ -240,6 +258,34 @@ interface SiteStore {
 
 let countyRequestToken = 0
 let pendingFloodView: LngLatBounds | null = null
+
+/**
+ * P2 overlay: the map's "Overall" metric now shows the REAL Regional
+ * Opportunity Score (state = median of county scores). Regions without a
+ * regional score (AK/HI, missing evidence) get undefined → "no data"
+ * styling, so the old synthetic overall never shows through.
+ */
+const overlayStateOverall = (
+  fc: ScoredStatesGeo,
+  medians: Record<string, number>,
+): ScoredStatesGeo => ({
+  ...fc,
+  features: fc.features.map((f) => ({
+    ...f,
+    properties: { ...f.properties, overall: medians[f.properties.id] },
+  })),
+})
+
+const overlayCountyOverall = (
+  fc: ScoredCountiesGeo,
+  byFips: Record<string, number>,
+): ScoredCountiesGeo => ({
+  ...fc,
+  features: fc.features.map((f) => ({
+    ...f,
+    properties: { ...f.properties, overall: byFips[f.properties.geoid] },
+  })),
+})
 
 export const useSiteStore = create<SiteStore>((set, get) => ({
   basemap: 'satellite',
@@ -354,15 +400,45 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
     pue: DEFAULT_PUE,
     wueLPerKwh: DEFAULT_WUE,
   },
-  setSimulationInputs: (inputs) =>
+  setSimulationInputs: (inputs) => {
     set((prev) => ({
       simulationInputs: { ...prev.simulationInputs, ...inputs },
-    })),
+    }))
+    recomputeRegional()
+  },
   planningHorizonYears: 30,
-  setPlanningHorizonYears: (planningHorizonYears) =>
-    set({ planningHorizonYears }),
+  setPlanningHorizonYears: (planningHorizonYears) => {
+    set({ planningHorizonYears })
+    recomputeRegional()
+  },
   priorityProfile: 'balanced',
-  setPriorityProfile: (priorityProfile) => set({ priorityProfile }),
+  setPriorityProfile: (priorityProfile) => {
+    set({ priorityProfile })
+    recomputeRegional()
+  },
+
+  regionalEvidence: null,
+  regionalScores: null,
+  regionalScoreByFips: {},
+  regionalStateMedians: {},
+  ensureRegionalEvidence: async () => {
+    if (get().regionalEvidence) return
+    try {
+      const evidence = await loadRegionalEvidence()
+      if (get().regionalEvidence) return
+      set({ regionalEvidence: evidence })
+      recomputeRegional()
+    } catch {
+      // Panel and map fall back to "no data" styling for Overall.
+    }
+  },
+  focusCountyFips: null,
+  focusCounty: (state, fips) => {
+    get().setSelectedStateId(state)
+    set({ focusCountyFips: fips })
+    get().showCountiesFor(state)
+  },
+  clearFocusCounty: () => set({ focusCountyFips: null }),
 
   regulatoryVisible: false,
   toggleRegulatory: () =>
@@ -501,9 +577,14 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
       set({
         statesGeo: geo,
         stateScores: scores,
-        scoredStates: joinScores(geo, scores),
+        scoredStates: overlayStateOverall(
+          joinScores(geo, scores),
+          get().regionalStateMedians,
+        ),
         stateDataError: null,
       })
+      get().ensureRegionalEvidence()
+      recomputeRegional()
     } catch (err) {
       set({ stateDataError: err instanceof Error ? err.message : String(err) })
     }
@@ -560,13 +641,58 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
           ? prev.countiesCache
           : { ...prev.countiesCache, [usps]: geo },
         countyViewStateId: usps,
-        scoredCounties: joinCountyScores(geo, scores),
+        scoredCounties: overlayCountyOverall(
+          joinCountyScores(geo, scores),
+          get().regionalScoreByFips,
+        ),
       }))
     } catch (err) {
       set({ stateDataError: err instanceof Error ? err.message : String(err) })
     }
   },
 }))
+
+/**
+ * Recomputes P2 regional scores for the current facility + profile and
+ * refreshes the map joins. Pure in-memory work over precomputed evidence —
+ * no refetching, no GIS — so facility/profile changes feel instant.
+ */
+function recomputeRegional() {
+  const s = useSiteStore.getState()
+  const evidence = s.regionalEvidence
+  if (!evidence) return
+  const scores = scoreAllCounties(
+    evidence,
+    { ...s.simulationInputs, planningHorizonYears: s.planningHorizonYears },
+    s.priorityProfile,
+  )
+  const byFips: Record<string, number> = {}
+  for (const r of scores) {
+    if (r.score !== null) byFips[r.fips] = r.score
+  }
+  const medians = stateMedians(scores)
+  const patch: Partial<SiteStore> = {
+    regionalScores: scores,
+    regionalScoreByFips: byFips,
+    regionalStateMedians: medians,
+  }
+  if (s.statesGeo && s.stateScores) {
+    patch.scoredStates = overlayStateOverall(
+      joinScores(s.statesGeo, s.stateScores),
+      medians,
+    )
+  }
+  if (s.countyViewStateId && s.countyScores) {
+    const geo = s.countiesCache[s.countyViewStateId]
+    if (geo) {
+      patch.scoredCounties = overlayCountyOverall(
+        joinCountyScores(geo, s.countyScores),
+        byFips,
+      )
+    }
+  }
+  useSiteStore.setState(patch)
+}
 
 // Debug handle for development tooling.
 if (typeof window !== 'undefined') {

@@ -44,8 +44,9 @@ Every metric in the app is explicitly labeled. The split today:
 | Regulatory / moratorium activity | ✅ **REAL** | Moratorium Nation 2026 snapshot (through 2026-09-23); record coordinates are jurisdiction **centroids** — proximity is discovery context, never legal applicability |
 | Power & grid context (generation/sales balance, demand growth, NERC reserve margins, facility burden) | ✅ **REAL** | EIA-style state generation + sales data and NERC 2026 SRA margins; generation balance is an accounting figure, **not** spare capacity, and the facility-burden share is a scenario output |
 | Sustainable Site Score (decision engine) | ✅ **REAL inputs only** | Hard constraints (NLCD water/wetlands/ice, FEMA floodway/V-VE) then five pillars aggregated by weighted geometric mean, with a separate evidence-confidence figure; zero mock inputs — demo scores never enter it |
-| State suitability scores (nationwide choropleth) | ⚠️ **MOCK** | Synthetic demo values (`state_scores.json`) |
-| County suitability scores | ⚠️ **MOCK** | Synthetic demo values (`county_scores.json`) |
+| Regional Opportunity Score (nationwide screening) | ✅ **REAL** | 3,109 CONUS counties scored from precomputed raw evidence with the same P1 utilities (minus FEMA/NLCD, which stay exact-site); drives the map's Overall view and the Top Regional Candidates list. Representative county points — not parcels |
+| State/county map "Overall" view | ✅ **REAL** | Now the Regional Opportunity Score (county) and its state median (State Regional Screening Summary) |
+| State/county Power·Water·Buildability metric views | ⚠️ **MOCK** | Synthetic demo values (`state_scores.json`, `county_scores.json`), labeled mock in tooltips and panels |
 | H3 cell scores + local power/water scores | ⚠️ **MOCK** | Synthetic demo values for prototyping the drilldown flow |
 
 Mock scores exist only to prototype the national → state → county → cell

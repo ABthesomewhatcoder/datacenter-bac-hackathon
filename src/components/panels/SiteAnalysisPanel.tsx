@@ -22,6 +22,7 @@ import FacilitySimulator from './FacilitySimulator'
 import PowerGridContext from './PowerGridContext'
 import RegulatoryContext from './RegulatoryContext'
 import SiteScoreCard from './SiteScoreCard'
+import TopRegionalCandidates from './TopRegionalCandidates'
 import {
   RADIUS_OPTIONS_MILES,
   useSiteStore,
@@ -122,6 +123,8 @@ export default function SiteAnalysisPanel() {
   const waterAssessment = useSiteStore((s) => s.waterAssessment)
   const assessSiteWater = useSiteStore((s) => s.assessSiteWater)
   const assessSiteRegulatory = useSiteStore((s) => s.assessSiteRegulatory)
+  const regionalScoreByFips = useSiteStore((s) => s.regionalScoreByFips)
+  const regionalStateMedians = useSiteStore((s) => s.regionalStateMedians)
 
   useEffect(() => {
     if (selectedSite) {
@@ -732,6 +735,36 @@ export default function SiteAnalysisPanel() {
               </button>
             </div>
 
+            {!showCell && (
+              <>
+                {(() => {
+                  const real = showCounty
+                    ? selectedCountyId
+                      ? (regionalScoreByFips[selectedCountyId] ?? null)
+                      : null
+                    : selectedStateId
+                      ? (regionalStateMedians[selectedStateId] ?? null)
+                      : null
+                  return real !== null ? (
+                    <div className="site-facts">
+                      <div className="site-fact">
+                        <span>
+                          {showCounty
+                            ? 'Regional Opportunity'
+                            : 'State Regional Screening Summary'}{' '}
+                          <span className="tag tag--real">Real</span>
+                        </span>
+                        <span>{Math.round(real)} / 100</span>
+                      </div>
+                    </div>
+                  ) : null
+                })()}
+                <div className="panel__subheading panel__subheading--minor">
+                  Demo navigation scores{' '}
+                  <span className="tag tag--scenario">Mock</span>
+                </div>
+              </>
+            )}
             {showCell && selectedCell ? (
               <MetricBars bars={cellBars(selectedCell)} />
             ) : showCounty && countyScore ? (
@@ -757,16 +790,16 @@ export default function SiteAnalysisPanel() {
             )}
           </div>
         ) : (
-          <div className="empty-state">
-            <div className="empty-state__icon" aria-hidden="true">
-              ◎
+          <>
+            <TopRegionalCandidates />
+            <div className="empty-state empty-state--compact">
+              <p className="empty-state__hint">
+                Click a state to zoom in, a county to drill down, a local
+                cell to inspect suitability, then place an exact candidate
+                site.
+              </p>
             </div>
-            <p className="empty-state__title">No area selected</p>
-            <p className="empty-state__hint">
-              Click a state to zoom in, a county to drill down, a local cell
-              to inspect suitability, then place an exact candidate site.
-            </p>
-          </div>
+          </>
         )}
       </section>
     </aside>

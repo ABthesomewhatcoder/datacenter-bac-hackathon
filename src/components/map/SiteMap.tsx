@@ -67,6 +67,8 @@ export default function SiteMap() {
   const statesGeo = useSiteStore((s) => s.statesGeo)
   const stateScores = useSiteStore((s) => s.stateScores)
   const countyScores = useSiteStore((s) => s.countyScores)
+  const regionalScoreByFips = useSiteStore((s) => s.regionalScoreByFips)
+  const regionalStateMedians = useSiteStore((s) => s.regionalStateMedians)
   const scoredCounties = useSiteStore((s) => s.scoredCounties)
   const selectedCountyId = useSiteStore((s) => s.selectedCountyId)
   const setSelectedStateId = useSiteStore((s) => s.setSelectedStateId)
@@ -102,6 +104,26 @@ export default function SiteMap() {
   useEffect(() => {
     loadStateData()
   }, [loadStateData])
+
+  // Top Regional Candidates click → zoom to the county once its geometry
+  // is in the county view, then hand off to normal drill-down flow.
+  const focusCountyFips = useSiteStore((s) => s.focusCountyFips)
+  const clearFocusCounty = useSiteStore((s) => s.clearFocusCounty)
+  useEffect(() => {
+    if (!focusCountyFips) return
+    const feature = scoredCounties?.features.find(
+      (f) => f.properties.geoid === focusCountyFips,
+    )
+    if (feature && mapRef.current) {
+      setSelectedCountyId(focusCountyFips)
+      mapRef.current.fitBounds(featureBounds(feature), {
+        padding: FIT_PADDING,
+        duration: 1400,
+        maxZoom: 9.5,
+      })
+      clearFocusCounty()
+    }
+  }, [focusCountyFips, scoredCounties, setSelectedCountyId, clearFocusCounty])
 
   // Debug handle for development tooling.
   useEffect(() => {
@@ -186,7 +208,7 @@ export default function SiteMap() {
               y: evt.point.y,
               title: props.name,
               subtitle: stateNameById[props.state] ?? props.state,
-              rows: score ? scoreRows(score) : null,
+              rows: scoreRows(score, regionalScoreByFips[props.geoid] ?? null),
             })
             return
           }
@@ -218,7 +240,7 @@ export default function SiteMap() {
           y: evt.point.y,
           title: props.name,
           subtitle: stateNameById[props.state] ?? props.state,
-          rows: score ? scoreRows(score) : null,
+          rows: scoreRows(score, regionalScoreByFips[props.geoid] ?? null),
         })
         return
       }
@@ -230,7 +252,7 @@ export default function SiteMap() {
         x: evt.point.x,
         y: evt.point.y,
         title: props.name,
-        rows: score ? scoreRows(score) : null,
+        rows: scoreRows(score, regionalStateMedians[props.id] ?? null),
       })
     },
     [
@@ -240,6 +262,8 @@ export default function SiteMap() {
       setHover,
       stateScores,
       countyScores,
+      regionalScoreByFips,
+      regionalStateMedians,
       stateNameById,
     ],
   )

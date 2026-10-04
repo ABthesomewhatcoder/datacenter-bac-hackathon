@@ -11,7 +11,9 @@
     "test:reg": "node --experimental-strip-types scripts/test-regulatory.ts",
     "test:grid": "node --experimental-strip-types scripts/test-grid.ts",
     "test:decision": "node --experimental-strip-types scripts/test-decision.ts",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare:regional": "node --experimental-strip-types scripts/generate-regional-evidence.ts",
+    "test:regional": "node --experimental-strip-types scripts/test-regional.ts"
   },
   "dependencies": {
     "@deck.gl/core": "^9.4.0",

@@ -16,16 +16,31 @@ export interface TooltipInfo {
   rows: TooltipRow[] | null
 }
 
-/** Standard rows for a state/county score. */
-export function scoreRows(score: StateScore): TooltipRow[] {
-  return (
-    [
-      ['Overall', score.overall],
-      ['Power', score.power],
-      ['Water', score.water],
-      ['Buildability', score.buildability],
-    ] as Array<[string, number]>
-  ).map(([label, value]) => ({ label, value, color: scoreToColor(value) }))
+/**
+ * Standard rows for a state/county hover. The headline row is the REAL
+ * Regional Opportunity Score (P2 screening) when available; the remaining
+ * rows are the legacy mock navigation scores, labeled as such.
+ */
+export function scoreRows(
+  score: StateScore | undefined,
+  regionalOverall: number | null | undefined,
+): TooltipRow[] {
+  const rows: Array<[string, number]> = []
+  if (regionalOverall !== null && regionalOverall !== undefined) {
+    rows.push(['Regional Opportunity · REAL', Math.round(regionalOverall)])
+  }
+  if (score) {
+    rows.push(
+      ['Power (mock)', score.power],
+      ['Water (mock)', score.water],
+      ['Buildability (mock)', score.buildability],
+    )
+  }
+  return rows.map(([label, value]) => ({
+    label,
+    value,
+    color: scoreToColor(value),
+  }))
 }
 
 export default function MapTooltip({ info }: { info: TooltipInfo }) {
