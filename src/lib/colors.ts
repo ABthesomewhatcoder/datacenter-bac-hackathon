@@ -1,5 +1,5 @@
 import type { ExpressionSpecification } from 'mapbox-gl'
-import type { Metric } from './scoring'
+import type { Metric } from './scoring.ts'
 
 /**
  * Score → color ramp (red = low, yellow/orange = mid, green = high).

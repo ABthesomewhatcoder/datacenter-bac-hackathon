@@ -1,4 +1,4 @@
-import type { SelectedSite } from '../store/useSiteStore'
+import type { SelectedSite } from '../store/useSiteStore.ts'
 
 /**
  * REAL DATA — Moratorium Nation 2026 (Bommarito, M.J.), local data-center

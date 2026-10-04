@@ -5,7 +5,7 @@ import type {
   LineString,
   MultiLineString,
 } from 'geojson'
-import type { SelectedSite } from '../store/useSiteStore'
+import type { SelectedSite } from '../store/useSiteStore.ts'
 
 /**
  * REAL DATA — HIFLD Electric Power Transmission Lines, extracted per state

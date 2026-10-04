@@ -48,6 +48,7 @@ import {
   type LandConstraint,
   type LandCoverResult,
 } from '../lib/landCover'
+import type { PriorityProfileId } from '../lib/decisionEngine'
 import {
   assessRegulatoryActivity,
   findNearbyActivity,
@@ -190,6 +191,12 @@ interface SiteStore {
   /** Facility simulator scenario inputs (persist across sites). */
   simulationInputs: SimulationInputs
   setSimulationInputs: (inputs: Partial<SimulationInputs>) => void
+  /** Facility planning horizon (drives Aqueduct horizon weighting). */
+  planningHorizonYears: 20 | 30
+  setPlanningHorizonYears: (years: 20 | 30) => void
+  /** Decision priority profile — controls pillar WEIGHTS only. */
+  priorityProfile: PriorityProfileId
+  setPriorityProfile: (profile: PriorityProfileId) => void
   /** REAL Moratorium Nation 2026 regulatory context for the current site. */
   regulatoryVisible: boolean
   toggleRegulatory: () => void
@@ -351,6 +358,11 @@ export const useSiteStore = create<SiteStore>((set, get) => ({
     set((prev) => ({
       simulationInputs: { ...prev.simulationInputs, ...inputs },
     })),
+  planningHorizonYears: 30,
+  setPlanningHorizonYears: (planningHorizonYears) =>
+    set({ planningHorizonYears }),
+  priorityProfile: 'balanced',
+  setPriorityProfile: (priorityProfile) => set({ priorityProfile }),
 
   regulatoryVisible: false,
   toggleRegulatory: () =>

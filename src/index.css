@@ -998,3 +998,119 @@ body,
 .reg-popup {
   z-index: 20;
 }
+
+/* ---------- Sustainable Site Score card ---------- */
+
+.score-card {
+  margin: 4px 0 10px;
+  padding: 12px 12px 8px;
+  border: 1px solid rgba(53, 194, 201, 0.35);
+  border-radius: 10px;
+  background: rgba(53, 194, 201, 0.05);
+}
+
+.score-card__profiles,
+.score-card__horizon {
+  margin-bottom: 6px;
+}
+
+.score-card__headline {
+  font-size: 30px;
+  font-weight: 700;
+  margin: 8px 0 4px;
+  color: var(--text);
+}
+
+.score-card__denom {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.score-card__class {
+  margin-left: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  vertical-align: middle;
+}
+
+.score-card__headline--excluded {
+  color: #e5484d;
+  font-size: 22px;
+  letter-spacing: 0.06em;
+}
+
+.score-card__exclusion {
+  margin: 2px 0 8px;
+  font-size: 11.5px;
+  color: #e5484d;
+}
+
+.score-card__pass {
+  color: #1f9d55;
+  font-weight: 700;
+}
+
+.score-card__fail {
+  color: #e5484d;
+  font-weight: 700;
+}
+
+.score-card__pillars {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 10px 0 4px;
+}
+
+.score-pillar__head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.score-pillar__weight {
+  color: var(--text-muted);
+  font-size: 9.5px;
+}
+
+.score-pillar__value {
+  font-weight: 600;
+}
+
+.score-pillar__bar {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(240, 246, 252, 0.08);
+  overflow: hidden;
+}
+
+.score-pillar__fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.score-card__list {
+  margin: 4px 0 8px;
+  padding-left: 16px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.score-card__list li {
+  margin-bottom: 3px;
+}
+
+.score-card__list--good li::marker {
+  color: #1f9d55;
+}
+
+.score-card__list--risk li::marker {
+  color: #ee6c4d;
+}

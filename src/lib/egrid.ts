@@ -1,6 +1,6 @@
 import type { Feature, FeatureCollection, Geometry } from 'geojson'
-import { featureContains } from './geo'
-import type { SelectedSite } from '../store/useSiteStore'
+import { featureContains } from './geo.ts'
+import type { SelectedSite } from '../store/useSiteStore.ts'
 
 /**
  * REAL DATA — EPA eGRID2023 Revision 2 (released June 12, 2025).

@@ -1,6 +1,6 @@
 import type { Feature, FeatureCollection, Geometry } from 'geojson'
-import { featureContains, type LngLatBounds } from './geo'
-import type { SelectedSite } from '../store/useSiteStore'
+import { featureContains, type LngLatBounds } from './geo.ts'
+import type { SelectedSite } from '../store/useSiteStore.ts'
 
 /**
  * REAL DATA — FEMA National Flood Hazard Layer (NFHL), queried live from

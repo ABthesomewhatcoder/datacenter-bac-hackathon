@@ -10,6 +10,7 @@
     "test:sim": "node --experimental-strip-types scripts/test-simulation.ts",
     "test:reg": "node --experimental-strip-types scripts/test-regulatory.ts",
     "test:grid": "node --experimental-strip-types scripts/test-grid.ts",
+    "test:decision": "node --experimental-strip-types scripts/test-decision.ts",
     "preview": "vite preview"
   },
   "dependencies": {

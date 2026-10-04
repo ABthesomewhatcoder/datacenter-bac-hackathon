@@ -21,6 +21,7 @@ import {
 import FacilitySimulator from './FacilitySimulator'
 import PowerGridContext from './PowerGridContext'
 import RegulatoryContext from './RegulatoryContext'
+import SiteScoreCard from './SiteScoreCard'
 import {
   RADIUS_OPTIONS_MILES,
   useSiteStore,
@@ -271,6 +272,15 @@ export default function SiteAnalysisPanel() {
               </div>
             </div>
 
+            <SiteScoreCard
+              nearestLine={nearestLine}
+              transmissionMissing={transmissionData === 'missing'}
+            />
+
+            <div className="panel__subheading panel__subheading--minor">
+              Demo navigation scores{' '}
+              <span className="tag tag--scenario">Mock</span>
+            </div>
             <MetricBars
               bars={[
                 ...(countyScore

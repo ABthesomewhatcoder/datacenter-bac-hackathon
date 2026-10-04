@@ -1,4 +1,4 @@
-import type { SelectedSite } from '../store/useSiteStore'
+import type { SelectedSite } from '../store/useSiteStore.ts'
 
 /**
  * REAL DATA — USGS Annual NLCD (Collection 1.2) land cover, queried live

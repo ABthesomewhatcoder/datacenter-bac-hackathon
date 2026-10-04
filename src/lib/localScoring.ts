@@ -15,8 +15,8 @@ import type {
   Polygon,
   Position,
 } from 'geojson'
-import { featureContains } from './geo'
-import type { StateScore } from './scoring'
+import { featureContains } from './geo.ts'
+import type { StateScore } from './scoring.ts'
 
 /**
  * MOCK / DEMO DATA ONLY — local H3 suitability is synthetic, generated

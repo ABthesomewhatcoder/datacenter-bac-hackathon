@@ -1,6 +1,6 @@
 import type { FeatureCollection, Geometry } from 'geojson'
-import { featureContains } from './geo'
-import type { SelectedSite } from '../store/useSiteStore'
+import { featureContains } from './geo.ts'
+import type { SelectedSite } from '../store/useSiteStore.ts'
 
 /**
  * REAL DATA — WRI Aqueduct 4.0 water stress (Y2023M07D05 release),

@@ -43,6 +43,7 @@ Every metric in the app is explicitly labeled. The split today:
 | Facility-simulator outputs | ✅ **REAL formulas** | DOE/EPA/Microsoft methodology; carbon uses the site's real eGRID rate. IT capacity, PUE, and WUE are user **scenario assumptions**, labeled as such in the UI |
 | Regulatory / moratorium activity | ✅ **REAL** | Moratorium Nation 2026 snapshot (through 2026-09-23); record coordinates are jurisdiction **centroids** — proximity is discovery context, never legal applicability |
 | Power & grid context (generation/sales balance, demand growth, NERC reserve margins, facility burden) | ✅ **REAL** | EIA-style state generation + sales data and NERC 2026 SRA margins; generation balance is an accounting figure, **not** spare capacity, and the facility-burden share is a scenario output |
+| Sustainable Site Score (decision engine) | ✅ **REAL inputs only** | Hard constraints (NLCD water/wetlands/ice, FEMA floodway/V-VE) then five pillars aggregated by weighted geometric mean, with a separate evidence-confidence figure; zero mock inputs — demo scores never enter it |
 | State suitability scores (nationwide choropleth) | ⚠️ **MOCK** | Synthetic demo values (`state_scores.json`) |
 | County suitability scores | ⚠️ **MOCK** | Synthetic demo values (`county_scores.json`) |
 | H3 cell scores + local power/water scores | ⚠️ **MOCK** | Synthetic demo values for prototyping the drilldown flow |
