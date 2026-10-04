@@ -28,10 +28,27 @@ deck.gl, Zustand, and Turf.
   with real Aqueduct water-stress context alongside. The UI explicitly
   separates **scenario inputs** from **real site data**.
 
-> **Mock vs. real data:** state/county/H3 suitability scores are
-> **mock/demo values** for prototyping the navigation flow. Flood, land
-> cover, water stress, grid carbon, transmission proximity, and everything
-> in the facility simulator derive from the real sources listed below.
+## Real vs. mock data
+
+Every metric in the app is explicitly labeled. The split today:
+
+| Data | Status | Notes |
+| --- | --- | --- |
+| Grid carbon intensity (eGRID subregion + CO2e rate) | ✅ **REAL** | EPA eGRID2023 Rev. 2 |
+| Water stress (baseline, 2030/2050 BAU) | ✅ **REAL** | WRI Aqueduct 4.0 |
+| Flood-zone screening | ✅ **REAL** | FEMA NFHL, queried live |
+| Land-cover screening | ✅ **REAL** | USGS Annual NLCD 2025, queried live |
+| Transmission lines + nearest-line proximity | ✅ **REAL** | HIFLD, all 48 contiguous states + DC |
+| State/county geometry | ✅ **REAL** | U.S. Census |
+| Facility-simulator outputs | ✅ **REAL formulas** | DOE/EPA/Microsoft methodology; carbon uses the site's real eGRID rate. IT capacity, PUE, and WUE are user **scenario assumptions**, labeled as such in the UI |
+| State suitability scores (nationwide choropleth) | ⚠️ **MOCK** | Synthetic demo values (`state_scores.json`) |
+| County suitability scores | ⚠️ **MOCK** | Synthetic demo values (`county_scores.json`) |
+| H3 cell scores + local power/water scores | ⚠️ **MOCK** | Synthetic demo values for prototyping the drilldown flow |
+
+Mock scores exist only to prototype the national → state → county → cell
+navigation; they are not derived from any real dataset and are flagged
+"MOCK / DEMO" in the UI. All candidate-site assessments and simulator math
+use the real sources below.
 
 ## Run locally
 
@@ -78,19 +95,61 @@ runtime (no key required).
 
 ## Data sources
 
-| Layer / metric | Source | How it's accessed |
-| --- | --- | --- |
-| Grid carbon intensity | [EPA eGRID2023 Rev. 2](https://www.epa.gov/egrid/summary-data) — subregion polygons + CO2e total output emission rates | Preprocessed by `scripts/prepare-egrid.mjs`, committed in `public/data/egrid/` |
-| Water stress | [WRI Aqueduct 4.0](https://www.wri.org/data/aqueduct-global-maps-40-data) — baseline + 2030/2050 BAU projections | Preprocessed by `scripts/prepare-aqueduct.mjs`, committed in `public/data/aqueduct/` |
-| Transmission lines | [HIFLD Electric Power Transmission Lines](https://hifld-geoplatform.hub.arcgis.com/) | Fetched per state by `scripts/fetch-transmission.mjs`, committed in `public/data/transmission/` |
-| Flood zones | [FEMA National Flood Hazard Layer](https://hazards.fema.gov/) | Live ArcGIS REST queries at runtime |
-| Land cover | [USGS Annual NLCD](https://www.mrlc.gov/) | Live WMS queries at runtime |
-| State/county geometry | U.S. Census (2010, 20m) | Preprocessed by `scripts/prepare-states.mjs` / `prepare-counties.mjs` |
+### EPA eGRID2023 Revision 2 (grid carbon intensity)
 
-Facility-simulator methodology: [DOE Data Center Best Practices Guide](https://www.energy.gov/sites/default/files/2024-07/best-practice-guide-data-center-design_0.pdf)
-(PUE definition and reference points), [DOE FEMP cooling/water efficiency guidance](https://www.energy.gov/cmei/femp/cooling-water-efficiency-opportunities-federal-data-centers),
-and [Microsoft's PUE/WUE methodology](https://datacenters.microsoft.com/sustainability/efficiency/)
-(WUE = annual liters for cooling/humidification ÷ annual IT equipment kWh).
+Subregion polygons + CO2e **total output** emission rates (field SRC2ERTA —
+not non-baseload). Preprocessed by `scripts/prepare-egrid.mjs`, committed
+in `public/data/egrid/`.
+
+- <https://www.epa.gov/egrid/summary-data>
+- <https://www.epa.gov/system/files/documents/2025-06/egrid2023_data_rev2.xlsx>
+- <https://www.epa.gov/system/files/other-files/2025-01/egrid2023_subregions.zip>
+- <https://www.epa.gov/system/files/other-files/2025-01/egrid2023_multiple_subregions.zip>
+
+### WRI Aqueduct 4.0 (water stress)
+
+Baseline water stress + 2030/2050/2080 Business-as-Usual projections on
+HydroBASINS level-6 sub-basins. CC BY 4.0 © World Resources Institute.
+Preprocessed by `scripts/prepare-aqueduct.mjs`, committed in
+`public/data/aqueduct/`.
+
+- <https://files.wri.org/aqueduct/aqueduct-4-0-water-risk-data.zip>
+- <https://data.hydrosheds.org/file/HydroBASINS/standard/hybas_na_lev06_v1c.zip> (basin geometry © HydroSHEDS/WWF)
+- <https://github.com/wri/Aqueduct40/blob/master/data_dictionary_water-risk-atlas.md>
+
+### HIFLD Electric Power Transmission Lines (transmission)
+
+Statewide extracts for all 48 contiguous states + DC, fetched by
+`scripts/fetch-transmission.mjs`, committed in `public/data/transmission/`.
+
+- Service: <https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Electric_Power_Transmission_Lines/FeatureServer/0>
+- Catalog: <https://catalog.data.gov/dataset/electric-power-transmission-lines>
+
+### FEMA National Flood Hazard Layer (flood zones)
+
+Flood Hazard Zones (S_FLD_HAZ_AR, layer 28), queried **live at runtime**
+from the public ArcGIS REST service — no key required.
+
+- <https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28>
+
+### USGS Annual NLCD, Collection 1.2 (land cover)
+
+2025 land cover at 30 m resolution, queried **live at runtime** from the
+official USGS/MRLC GeoServer WMS — no key required.
+
+- <https://dmsdata.cr.usgs.gov/geoserver/mrlc_Land-Cover-Native_conus_year_data/wms>
+- Legend: <https://www.mrlc.gov/data/type/land-cover>
+
+### U.S. Census (state/county geometry)
+
+2010 cartographic boundaries (20m), preprocessed by
+`scripts/prepare-states.mjs` / `scripts/prepare-counties.mjs`.
+
+### Facility-simulator methodology
+
+- [DOE Data Center Best Practices Guide](https://www.energy.gov/sites/default/files/2024-07/best-practice-guide-data-center-design_0.pdf) — PUE definition and reference points (1.6 Standard / 1.4 Good / 1.1 Better)
+- [DOE FEMP cooling/water efficiency guidance](https://www.energy.gov/cmei/femp/cooling-water-efficiency-opportunities-federal-data-centers)
+- [Microsoft PUE/WUE methodology and FY25 benchmarks](https://datacenters.microsoft.com/sustainability/efficiency/) — WUE = annual liters for cooling/humidification ÷ annual IT equipment kWh; FY25 WUE 0.27 L/kWh global, 0.34 L/kWh Americas (used as scenario presets, not site measurements)
 
 ## Structure
 
