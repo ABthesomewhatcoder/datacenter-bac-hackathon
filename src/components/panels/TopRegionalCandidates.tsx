@@ -58,6 +58,7 @@ export default function TopRegionalCandidates() {
   }
 
   const evaluated = regionalScores!.filter((s) => s.score !== null).length
+  const eligible = regionalScores!.filter((s) => s.rankingEligible).length
 
   const renderRow = (s: RegionalCountyScore, i: number) => {
     const evidence = evidenceByFips.get(s.fips)
@@ -121,6 +122,13 @@ export default function TopRegionalCandidates() {
         <div className="site-fact">
           <span>Counties evaluated</span>
           <span>{evaluated.toLocaleString('en-US')}</span>
+        </div>
+        <div className="site-fact">
+          <span>Meet evidence requirements</span>
+          <span>
+            {eligible.toLocaleString('en-US')} of{' '}
+            {evaluated.toLocaleString('en-US')}
+          </span>
         </div>
         <div className="site-fact">
           <span>Facility</span>

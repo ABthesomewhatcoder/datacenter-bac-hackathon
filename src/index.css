@@ -1209,3 +1209,20 @@ body,
 .empty-state--compact {
   padding: 8px 0 0;
 }
+
+.regional-ineligible {
+  margin: 4px 0 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #e9c23f;
+}
+
+.regional-ineligible__reasons {
+  display: block;
+  margin-top: 2px;
+  font-weight: 400;
+  letter-spacing: 0;
+  font-size: 10.5px;
+  color: var(--text-muted);
+}

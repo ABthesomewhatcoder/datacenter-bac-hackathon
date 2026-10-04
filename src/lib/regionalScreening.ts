@@ -105,7 +105,20 @@ export interface RegionalCountyScore {
   score: number | null
   confidencePct: number
   pillars: Record<RegionalPillarId, number | null>
+  /**
+   * Evidence sufficiency gate for NATIONAL ranking — not a hard site
+   * exclusion and not a geographic feasibility judgment. A county whose
+   * geometric mean renormalized over partial evidence can be a valid
+   * score over what's available without being sufficiently evidenced to
+   * recommend nationally.
+   */
+  rankingEligible: boolean
+  /** Why the county is excluded from the Top Candidates list, if it is. */
+  ineligibilityReasons: string[]
 }
+
+/** Minimum evidence confidence for national-ranking eligibility. */
+export const RANKING_MIN_CONFIDENCE_PCT = 65
 
 /** P1 profile weights with Physical removed; geometric mean renormalizes. */
 export function regionalWeights(
@@ -183,6 +196,19 @@ export function scoreAllCounties(
       ) / totalWeight) * 100,
     )
 
+    // Evidence sufficiency gate. NERC is deliberately NOT mandatory (some
+    // states cannot yet be mapped confidently), and absence of a recorded
+    // moratorium never affects eligibility. Missing data is NEVER scored
+    // as zero — ineligible counties keep their score on the map.
+    const ineligibilityReasons: string[] = []
+    if (c.egridKg === null) ineligibilityReasons.push('Missing EPA carbon assignment')
+    if (c.wBase === null) ineligibilityReasons.push('Missing Aqueduct basin')
+    if (c.txDistMi === null) ineligibilityReasons.push('Missing transmission evidence')
+    if (c.salesTWh === null) ineligibilityReasons.push('Missing state demand/grid context')
+    if (confidencePct < RANKING_MIN_CONFIDENCE_PCT) {
+      ineligibilityReasons.push(`Evidence confidence ${confidencePct}%`)
+    }
+
     return {
       fips: c.fips,
       name: c.name,
@@ -190,14 +216,20 @@ export function scoreAllCounties(
       score: score !== null ? Math.round(score * 10) / 10 : null,
       confidencePct,
       pillars,
+      rankingEligible: ineligibilityReasons.length === 0,
+      ineligibilityReasons,
     }
   })
 }
 
-/** Rank: Regional Opportunity desc, Evidence Confidence as tie-breaker. */
+/**
+ * National candidate ranking: ONLY rankingEligible counties, Regional
+ * Opportunity desc, Evidence Confidence as tie-breaker. The map still
+ * shows every scored county regardless of eligibility.
+ */
 export function rankCounties(scores: RegionalCountyScore[]): RegionalCountyScore[] {
   return scores
-    .filter((s) => s.score !== null)
+    .filter((s) => s.score !== null && s.rankingEligible)
     .sort(
       (a, b) =>
         (b.score as number) - (a.score as number) ||
@@ -270,7 +302,8 @@ export function regionalReasons(
     risks.push('High basin water stress (Aqueduct)')
   }
   if (c.regLevel === 'low') {
-    positives.push('No nearby active data-center moratoria recorded')
+    // Absence of a record is not proof of easy permitting.
+    positives.push('No recorded nearby data-center moratorium activity')
   } else if (c.regLevel === 'elevated') {
     risks.push('Some regulatory friction nearby (pending/historical activity)')
   } else {

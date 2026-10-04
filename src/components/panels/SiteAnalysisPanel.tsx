@@ -125,6 +125,7 @@ export default function SiteAnalysisPanel() {
   const assessSiteRegulatory = useSiteStore((s) => s.assessSiteRegulatory)
   const regionalScoreByFips = useSiteStore((s) => s.regionalScoreByFips)
   const regionalStateMedians = useSiteStore((s) => s.regionalStateMedians)
+  const regionalScores = useSiteStore((s) => s.regionalScores)
 
   useEffect(() => {
     if (selectedSite) {
@@ -745,18 +746,34 @@ export default function SiteAnalysisPanel() {
                     : selectedStateId
                       ? (regionalStateMedians[selectedStateId] ?? null)
                       : null
+                  const entry =
+                    showCounty && selectedCountyId
+                      ? (regionalScores?.find(
+                          (s) => s.fips === selectedCountyId,
+                        ) ?? null)
+                      : null
                   return real !== null ? (
-                    <div className="site-facts">
-                      <div className="site-fact">
-                        <span>
-                          {showCounty
-                            ? 'Regional Opportunity'
-                            : 'State Regional Screening Summary'}{' '}
-                          <span className="tag tag--real">Real</span>
-                        </span>
-                        <span>{Math.round(real)} / 100</span>
+                    <>
+                      <div className="site-facts">
+                        <div className="site-fact">
+                          <span>
+                            {showCounty
+                              ? 'Regional Opportunity'
+                              : 'State Regional Screening Summary'}{' '}
+                            <span className="tag tag--real">Real</span>
+                          </span>
+                          <span>{Math.round(real)} / 100</span>
+                        </div>
                       </div>
-                    </div>
+                      {entry && !entry.rankingEligible && (
+                        <p className="regional-ineligible">
+                          INSUFFICIENT EVIDENCE FOR NATIONAL RANKING
+                          <span className="regional-ineligible__reasons">
+                            {entry.ineligibilityReasons.join(' · ')}
+                          </span>
+                        </p>
+                      )}
+                    </>
                   ) : null
                 })()}
                 <div className="panel__subheading panel__subheading--minor">

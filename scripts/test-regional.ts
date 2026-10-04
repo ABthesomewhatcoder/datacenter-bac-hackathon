@@ -110,6 +110,44 @@ for (const fips of ['51107', '39049', '48029', '04013', '53033']) {
   )
 }
 
+// ---- Evidence sufficiency gate (ranking eligibility)
+const dare = scores250.find((s) => s.fips === '37055')! // Dare County, NC
+assert.ok(dare.score !== null && dare.score > 0, 'Dare keeps its score')
+assert.equal(dare.rankingEligible, false, 'Dare is NOT nationally rankable')
+assert.ok(dare.ineligibilityReasons.some((r) => r.includes('carbon')))
+assert.ok(dare.ineligibilityReasons.some((r) => r.includes('Aqueduct')))
+assert.ok(!ranked.some((s) => s.fips === '37055'), 'Dare absent from ranking')
+
+// Fully evidenced counties remain eligible; missing NERC alone does not gate
+const fullEvidence = scores250.find((s) => {
+  const c = evidence.counties.find((c) => c.fips === s.fips)!
+  return c.egridKg !== null && c.wBase !== null && c.txDistMi !== null &&
+    c.salesTWh !== null && c.nercArea !== null
+})!
+assert.ok(fullEvidence.rankingEligible)
+const noNercEligible = scores250.find((s) => {
+  const c = evidence.counties.find((c) => c.fips === s.fips)!
+  return c.nercArea === null && c.egridKg !== null && c.wBase !== null &&
+    c.txDistMi !== null && c.salesTWh !== null && !c.egridAmbiguous
+})
+assert.ok(noNercEligible, 'a NERC-less but otherwise complete county exists')
+assert.ok(
+  noNercEligible!.rankingEligible,
+  `missing NERC alone must not gate (conf ${noNercEligible!.confidencePct}%)`,
+)
+// Confidence floor gates: every ineligible county has a listed reason,
+// every county under 65% confidence is ineligible
+for (const s of scores250) {
+  if (s.confidencePct < 65) assert.equal(s.rankingEligible, false)
+  if (!s.rankingEligible) assert.ok(s.ineligibilityReasons.length > 0)
+  else assert.equal(s.ineligibilityReasons.length, 0)
+}
+// Ranked list contains only eligible counties
+assert.ok(ranked.every((s) => s.rankingEligible))
+// Score formulas unchanged: eligibility never alters a score
+const eligibleCount = scores250.filter((s) => s.rankingEligible).length
+console.log(`eligible for national ranking: ${eligibleCount}/${scores250.length}`)
+
 // ---- Report output
 const top20 = ranked.slice(0, 20)
 console.log('regionalScreening.ts: all tests passed')
