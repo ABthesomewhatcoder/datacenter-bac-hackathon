@@ -1,0 +1,30 @@
+{
+  "source": "NERC 2026 Summer Reliability Assessment — Demand and Resource Tables (pp. 45–55) and Key Findings (pp. 1–3)",
+  "url": "https://www.nerc.com/globalassets/our-work/assessments/nerc_sra_2026.pdf",
+  "extracted": "2026-10-04",
+  "note": "Anticipated Reserve Margin and Reference Margin Level are the 2026 SRA columns of each assessment area's Demand, Resource, and Reserve Margins table. riskSeasonal reflects NERC's Key Findings: all areas assessed adequate for normal summer peak conditions; areas listed as facing elevated risk under more extreme conditions are marked 'elevated'. No resource shortfalls (ARM below RML) are reported in the 2026 SRA.",
+  "areas": {
+    "MISO": { "anticipatedReserveMarginPct": 31.1, "referenceMarginPct": 15.0, "riskSeasonal": "normal" },
+    "MRO-SaskPower": { "anticipatedReserveMarginPct": 29.2, "referenceMarginPct": 15.0, "riskSeasonal": "elevated", "riskNote": "NERC Key Findings: elevated risk — margins tightened year-on-year; extreme conditions may require maintenance rescheduling, transfers, or demand response." },
+    "MRO-Manitoba Hydro": { "anticipatedReserveMarginPct": 13.2, "referenceMarginPct": 12.0, "riskSeasonal": "normal" },
+    "MRO-SPP": { "anticipatedReserveMarginPct": 26.8, "referenceMarginPct": 10.0, "riskSeasonal": "normal" },
+    "NPCC-Maritimes": { "anticipatedReserveMarginPct": 83.8, "referenceMarginPct": 20.0, "riskSeasonal": "normal" },
+    "NPCC-New England": { "anticipatedReserveMarginPct": 14.0, "referenceMarginPct": 13.0, "riskSeasonal": "elevated", "riskNote": "NERC Key Findings: elevated risk under extreme summer conditions — anticipated margin just above the reference level and firm imports reduced from the prior year." },
+    "NPCC-New York": { "anticipatedReserveMarginPct": 34.2, "referenceMarginPct": 15.0, "riskSeasonal": "normal" },
+    "NPCC-Ontario": { "anticipatedReserveMarginPct": 32.4, "referenceMarginPct": 26.3, "riskSeasonal": "normal" },
+    "PJM": { "anticipatedReserveMarginPct": 26.2, "referenceMarginPct": 18.6, "riskSeasonal": "normal" },
+    "SERC-Central": { "anticipatedReserveMarginPct": 18.9, "referenceMarginPct": 15.0, "riskSeasonal": "normal" },
+    "SERC-East": { "anticipatedReserveMarginPct": 26.3, "referenceMarginPct": 15.0, "riskSeasonal": "normal" },
+    "SERC-Florida Peninsula": { "anticipatedReserveMarginPct": 25.8, "referenceMarginPct": 15.0, "riskSeasonal": "normal" },
+    "SERC-Southeast": { "anticipatedReserveMarginPct": 36.9, "referenceMarginPct": 15.0, "riskSeasonal": "normal" },
+    "Texas RE-ERCOT": { "anticipatedReserveMarginPct": 67.9, "referenceMarginPct": 13.75, "riskSeasonal": "normal", "riskNote": "NERC Key Findings: normal risk area-wide; localized transmission constraints noted for Far West Texas under high demand with low wind/solar output." },
+    "WECC-AB": { "anticipatedReserveMarginPct": 32.3, "referenceMarginPct": 15.0, "riskSeasonal": "normal" },
+    "WECC-BC": { "anticipatedReserveMarginPct": 40.5, "referenceMarginPct": 10.0, "riskSeasonal": "normal" },
+    "WECC-Southwest": { "anticipatedReserveMarginPct": 48.1, "referenceMarginPct": 15.0, "riskSeasonal": "normal" },
+    "WECC-California": { "anticipatedReserveMarginPct": 55.6, "referenceMarginPct": 15.0, "riskSeasonal": "normal" },
+    "WECC-Northwest": { "anticipatedReserveMarginPct": 26.9, "referenceMarginPct": 10.0, "riskSeasonal": "elevated", "riskNote": "NERC Key Findings: elevated risk under extreme conditions — drought and early snowmelt affecting a supply fleet that is majority hydropower." },
+    "WECC-Basin": { "anticipatedReserveMarginPct": 37.6, "referenceMarginPct": 15.0, "riskSeasonal": "normal" },
+    "WECC-Mexico": { "anticipatedReserveMarginPct": 32.5, "referenceMarginPct": 15.0, "riskSeasonal": "normal" },
+    "WECC-Rocky Mountain": { "anticipatedReserveMarginPct": 51.9, "referenceMarginPct": 15.0, "riskSeasonal": "normal" }
+  }
+}

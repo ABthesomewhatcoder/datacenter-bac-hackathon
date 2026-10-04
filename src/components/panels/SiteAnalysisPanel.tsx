@@ -19,6 +19,7 @@ import {
   TRANSMISSION_DATASET,
 } from '../../lib/transmission'
 import FacilitySimulator from './FacilitySimulator'
+import PowerGridContext from './PowerGridContext'
 import RegulatoryContext from './RegulatoryContext'
 import {
   RADIUS_OPTIONS_MILES,
@@ -654,6 +655,11 @@ export default function SiteAnalysisPanel() {
             </div>
 
             <FacilitySimulator
+              nearestLine={nearestLine}
+              transmissionMissing={transmissionData === 'missing'}
+            />
+
+            <PowerGridContext
               nearestLine={nearestLine}
               transmissionMissing={transmissionData === 'missing'}
             />

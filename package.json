@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "test:sim": "node --experimental-strip-types scripts/test-simulation.ts",
     "test:reg": "node --experimental-strip-types scripts/test-regulatory.ts",
+    "test:grid": "node --experimental-strip-types scripts/test-grid.ts",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -1,0 +1,40 @@
+{
+  "name": "State power & grid context",
+  "dataStatus": "REAL DATA",
+  "generated": "2026-10-04",
+  "generationYear": 2024,
+  "sources": {
+    "generation": "EIA annual net generation by state (data-sources/annual_energy_supply.json; producer_type \"Total Electric Power Industry\", energy_source \"Total\")",
+    "demand": "State retail electricity sales, latest 12 months vs 5 years earlier (data-sources/state_electricity_demand.json)",
+    "nerc": "https://www.nerc.com/globalassets/our-work/assessments/nerc_sra_2026.pdf",
+    "nercLtra2025": "https://www.nerc.com/globalassets/our-work/assessments/nerc_ltra_2025.pdf",
+    "nercDataInstructions": "https://www.nerc.com/globalassets/who-we-are/standing-committees/rstc/ras/2026_sra_data_instructions.pdf",
+    "transmission": "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Electric_Power_Transmission_Lines/FeatureServer/0"
+  },
+  "caveats": [
+    "Annual generation balance does not represent spare grid capacity or guaranteed power availability.",
+    "Transmission proximity does not establish available interconnection capacity.",
+    "NERC regional adequacy does not guarantee utility service to any specific project.",
+    "States split across NERC assessment areas are reported as \"NERC regional context unavailable\" rather than guessed."
+  ],
+  "counts": {
+    "statesJoined": 51,
+    "statesWithNercArea": 39,
+    "nercAreasReferenced": 15,
+    "unmatchedDemandStates": []
+  },
+  "unmappedStates": {
+    "IL": "Split between MISO and PJM",
+    "MO": "Split between MISO and MRO-SPP",
+    "ND": "Split between MISO and MRO-SPP",
+    "SD": "Split between MRO-SPP and MISO",
+    "KY": "Split between SERC-Central and PJM",
+    "AL": "Split between SERC-Southeast and SERC-Central",
+    "WY": "Split between WECC-Basin and WECC-Rocky Mountain",
+    "MT": "Split between WECC-Northwest and MRO areas",
+    "ID": "Split between WECC-Northwest and WECC-Basin",
+    "NV": "Split between WECC-Basin and WECC-Southwest",
+    "AK": "Outside NERC SRA assessment areas",
+    "HI": "Outside NERC SRA assessment areas"
+  }
+}

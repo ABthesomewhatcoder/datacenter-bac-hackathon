@@ -42,6 +42,7 @@ Every metric in the app is explicitly labeled. The split today:
 | State/county geometry | ✅ **REAL** | U.S. Census |
 | Facility-simulator outputs | ✅ **REAL formulas** | DOE/EPA/Microsoft methodology; carbon uses the site's real eGRID rate. IT capacity, PUE, and WUE are user **scenario assumptions**, labeled as such in the UI |
 | Regulatory / moratorium activity | ✅ **REAL** | Moratorium Nation 2026 snapshot (through 2026-09-23); record coordinates are jurisdiction **centroids** — proximity is discovery context, never legal applicability |
+| Power & grid context (generation/sales balance, demand growth, NERC reserve margins, facility burden) | ✅ **REAL** | EIA-style state generation + sales data and NERC 2026 SRA margins; generation balance is an accounting figure, **not** spare capacity, and the facility-burden share is a scenario output |
 | State suitability scores (nationwide choropleth) | ⚠️ **MOCK** | Synthetic demo values (`state_scores.json`) |
 | County suitability scores | ⚠️ **MOCK** | Synthetic demo values (`county_scores.json`) |
 | H3 cell scores + local power/water scores | ⚠️ **MOCK** | Synthetic demo values for prototyping the drilldown flow |
@@ -159,6 +160,21 @@ establishes that a site is legally subject to a moratorium.
 - <https://raw.githubusercontent.com/mjbommar/moratorium-data-2026/main/data/moratorium_inventory.csv>
 - <https://raw.githubusercontent.com/mjbommar/moratorium-data-2026/main/data/state_legislation.csv>
 - Paper: <https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6242898>
+
+### Power & grid context
+
+Per-state generation (EIA-style annual net generation, Total Electric
+Power Industry / Total, latest year 2024), retail sales with 5-year
+growth, and NERC Summer 2026 reserve margins, preprocessed by
+`scripts/prepare-grid-context.mjs` from `data-sources/` into
+`public/data/grid/`. States split across NERC assessment areas are
+reported as "NERC regional context unavailable" rather than guessed.
+Annual generation balance (generation − sales) is an energy accounting
+figure — never spare capacity or available power.
+
+- NERC 2026 Summer Reliability Assessment: <https://www.nerc.com/globalassets/our-work/assessments/nerc_sra_2026.pdf>
+- NERC 2025 Long-Term Reliability Assessment: <https://www.nerc.com/globalassets/our-work/assessments/nerc_ltra_2025.pdf>
+- 2026 SRA data instructions: <https://www.nerc.com/globalassets/who-we-are/standing-committees/rstc/ras/2026_sra_data_instructions.pdf>
 
 ### Facility-simulator methodology
 

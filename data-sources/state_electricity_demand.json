@@ -1,0 +1,359 @@
+[
+  {
+    "state": "TX",
+    "sales_TWh_latest_12mo": 521.1,
+    "sales_TWh_5yr_earlier": 429.9,
+    "growth_pct_5yr": 21.2,
+    "avg_price_cents_per_kWh": 10.39
+  },
+  {
+    "state": "FL",
+    "sales_TWh_latest_12mo": 260.0,
+    "sales_TWh_5yr_earlier": 242.9,
+    "growth_pct_5yr": 7.1,
+    "avg_price_cents_per_kWh": 13.53
+  },
+  {
+    "state": "CA",
+    "sales_TWh_latest_12mo": 239.2,
+    "sales_TWh_5yr_earlier": 248.2,
+    "growth_pct_5yr": -3.6,
+    "avg_price_cents_per_kWh": 28.11
+  },
+  {
+    "state": "OH",
+    "sales_TWh_latest_12mo": 166.4,
+    "sales_TWh_5yr_earlier": 145.4,
+    "growth_pct_5yr": 14.5,
+    "avg_price_cents_per_kWh": 13.76
+  },
+  {
+    "state": "GA",
+    "sales_TWh_latest_12mo": 154.7,
+    "sales_TWh_5yr_earlier": 136.6,
+    "growth_pct_5yr": 13.3,
+    "avg_price_cents_per_kWh": 12.15
+  },
+  {
+    "state": "VA",
+    "sales_TWh_latest_12mo": 147.3,
+    "sales_TWh_5yr_earlier": 122.2,
+    "growth_pct_5yr": 20.5,
+    "avg_price_cents_per_kWh": 12.47
+  },
+  {
+    "state": "PA",
+    "sales_TWh_latest_12mo": 143.1,
+    "sales_TWh_5yr_earlier": 142.0,
+    "growth_pct_5yr": 0.8,
+    "avg_price_cents_per_kWh": 15.33
+  },
+  {
+    "state": "NY",
+    "sales_TWh_latest_12mo": 143.0,
+    "sales_TWh_5yr_earlier": 140.8,
+    "growth_pct_5yr": 1.6,
+    "avg_price_cents_per_kWh": 23.12
+  },
+  {
+    "state": "NC",
+    "sales_TWh_latest_12mo": 140.5,
+    "sales_TWh_5yr_earlier": 133.8,
+    "growth_pct_5yr": 5.1,
+    "avg_price_cents_per_kWh": 11.98
+  },
+  {
+    "state": "IL",
+    "sales_TWh_latest_12mo": 134.3,
+    "sales_TWh_5yr_earlier": 133.2,
+    "growth_pct_5yr": 0.8,
+    "avg_price_cents_per_kWh": 14.36
+  },
+  {
+    "state": "TN",
+    "sales_TWh_latest_12mo": 107.6,
+    "sales_TWh_5yr_earlier": 98.8,
+    "growth_pct_5yr": 8.8,
+    "avg_price_cents_per_kWh": 11.82
+  },
+  {
+    "state": "IN",
+    "sales_TWh_latest_12mo": 105.5,
+    "sales_TWh_5yr_earlier": 99.1,
+    "growth_pct_5yr": 6.5,
+    "avg_price_cents_per_kWh": 12.9
+  },
+  {
+    "state": "MI",
+    "sales_TWh_latest_12mo": 100.2,
+    "sales_TWh_5yr_earlier": 98.2,
+    "growth_pct_5yr": 2.0,
+    "avg_price_cents_per_kWh": 15.46
+  },
+  {
+    "state": "LA",
+    "sales_TWh_latest_12mo": 98.6,
+    "sales_TWh_5yr_earlier": 90.2,
+    "growth_pct_5yr": 9.3,
+    "avg_price_cents_per_kWh": 9.72
+  },
+  {
+    "state": "AZ",
+    "sales_TWh_latest_12mo": 96.4,
+    "sales_TWh_5yr_earlier": 82.8,
+    "growth_pct_5yr": 16.5,
+    "avg_price_cents_per_kWh": 12.84
+  },
+  {
+    "state": "WA",
+    "sales_TWh_latest_12mo": 90.4,
+    "sales_TWh_5yr_earlier": 87.1,
+    "growth_pct_5yr": 3.8,
+    "avg_price_cents_per_kWh": 11.76
+  },
+  {
+    "state": "AL",
+    "sales_TWh_latest_12mo": 89.5,
+    "sales_TWh_5yr_earlier": 85.2,
+    "growth_pct_5yr": 5.0,
+    "avg_price_cents_per_kWh": 12.78
+  },
+  {
+    "state": "SC",
+    "sales_TWh_latest_12mo": 86.0,
+    "sales_TWh_5yr_earlier": 78.8,
+    "growth_pct_5yr": 9.2,
+    "avg_price_cents_per_kWh": 11.98
+  },
+  {
+    "state": "MO",
+    "sales_TWh_latest_12mo": 80.5,
+    "sales_TWh_5yr_earlier": 77.0,
+    "growth_pct_5yr": 4.5,
+    "avg_price_cents_per_kWh": 11.9
+  },
+  {
+    "state": "KY",
+    "sales_TWh_latest_12mo": 75.5,
+    "sales_TWh_5yr_earlier": 73.4,
+    "growth_pct_5yr": 2.8,
+    "avg_price_cents_per_kWh": 11.03
+  },
+  {
+    "state": "OK",
+    "sales_TWh_latest_12mo": 74.9,
+    "sales_TWh_5yr_earlier": 63.3,
+    "growth_pct_5yr": 18.4,
+    "avg_price_cents_per_kWh": 9.85
+  },
+  {
+    "state": "NJ",
+    "sales_TWh_latest_12mo": 73.5,
+    "sales_TWh_5yr_earlier": 73.0,
+    "growth_pct_5yr": 0.7,
+    "avg_price_cents_per_kWh": 19.8
+  },
+  {
+    "state": "WI",
+    "sales_TWh_latest_12mo": 71.2,
+    "sales_TWh_5yr_earlier": 68.3,
+    "growth_pct_5yr": 4.2,
+    "avg_price_cents_per_kWh": 13.72
+  },
+  {
+    "state": "MN",
+    "sales_TWh_latest_12mo": 66.5,
+    "sales_TWh_5yr_earlier": 65.5,
+    "growth_pct_5yr": 1.6,
+    "avg_price_cents_per_kWh": 12.93
+  },
+  {
+    "state": "OR",
+    "sales_TWh_latest_12mo": 62.3,
+    "sales_TWh_5yr_earlier": 53.1,
+    "growth_pct_5yr": 17.2,
+    "avg_price_cents_per_kWh": 11.5
+  },
+  {
+    "state": "IA",
+    "sales_TWh_latest_12mo": 59.9,
+    "sales_TWh_5yr_earlier": 51.9,
+    "growth_pct_5yr": 15.4,
+    "avg_price_cents_per_kWh": 9.97
+  },
+  {
+    "state": "MD",
+    "sales_TWh_latest_12mo": 59.4,
+    "sales_TWh_5yr_earlier": 58.7,
+    "growth_pct_5yr": 1.2,
+    "avg_price_cents_per_kWh": 18.48
+  },
+  {
+    "state": "CO",
+    "sales_TWh_latest_12mo": 57.2,
+    "sales_TWh_5yr_earlier": 56.5,
+    "growth_pct_5yr": 1.1,
+    "avg_price_cents_per_kWh": 13.37
+  },
+  {
+    "state": "AR",
+    "sales_TWh_latest_12mo": 53.5,
+    "sales_TWh_5yr_earlier": 47.7,
+    "growth_pct_5yr": 12.2,
+    "avg_price_cents_per_kWh": 10.14
+  },
+  {
+    "state": "MA",
+    "sales_TWh_latest_12mo": 52.1,
+    "sales_TWh_5yr_earlier": 50.7,
+    "growth_pct_5yr": 2.7,
+    "avg_price_cents_per_kWh": 26.03
+  },
+  {
+    "state": "MS",
+    "sales_TWh_latest_12mo": 50.2,
+    "sales_TWh_5yr_earlier": 47.6,
+    "growth_pct_5yr": 5.5,
+    "avg_price_cents_per_kWh": 12.02
+  },
+  {
+    "state": "KS",
+    "sales_TWh_latest_12mo": 42.4,
+    "sales_TWh_5yr_earlier": 39.9,
+    "growth_pct_5yr": 6.4,
+    "avg_price_cents_per_kWh": 11.85
+  },
+  {
+    "state": "NV",
+    "sales_TWh_latest_12mo": 41.1,
+    "sales_TWh_5yr_earlier": 39.2,
+    "growth_pct_5yr": 4.9,
+    "avg_price_cents_per_kWh": 10.52
+  },
+  {
+    "state": "NE",
+    "sales_TWh_latest_12mo": 39.5,
+    "sales_TWh_5yr_earlier": 31.7,
+    "growth_pct_5yr": 24.7,
+    "avg_price_cents_per_kWh": 9.79
+  },
+  {
+    "state": "UT",
+    "sales_TWh_latest_12mo": 35.7,
+    "sales_TWh_5yr_earlier": 32.8,
+    "growth_pct_5yr": 8.8,
+    "avg_price_cents_per_kWh": 10.93
+  },
+  {
+    "state": "WV",
+    "sales_TWh_latest_12mo": 34.0,
+    "sales_TWh_5yr_earlier": 32.7,
+    "growth_pct_5yr": 4.2,
+    "avg_price_cents_per_kWh": 11.47
+  },
+  {
+    "state": "NM",
+    "sales_TWh_latest_12mo": 32.6,
+    "sales_TWh_5yr_earlier": 25.0,
+    "growth_pct_5yr": 30.2,
+    "avg_price_cents_per_kWh": 9.21
+  },
+  {
+    "state": "ND",
+    "sales_TWh_latest_12mo": 30.3,
+    "sales_TWh_5yr_earlier": 22.6,
+    "growth_pct_5yr": 34.4,
+    "avg_price_cents_per_kWh": 8.52
+  },
+  {
+    "state": "CT",
+    "sales_TWh_latest_12mo": 27.6,
+    "sales_TWh_5yr_earlier": 27.2,
+    "growth_pct_5yr": 1.5,
+    "avg_price_cents_per_kWh": 24.58
+  },
+  {
+    "state": "ID",
+    "sales_TWh_latest_12mo": 26.7,
+    "sales_TWh_5yr_earlier": 25.6,
+    "growth_pct_5yr": 4.6,
+    "avg_price_cents_per_kWh": 10.1
+  },
+  {
+    "state": "WY",
+    "sales_TWh_latest_12mo": 17.5,
+    "sales_TWh_5yr_earlier": 15.5,
+    "growth_pct_5yr": 12.8,
+    "avg_price_cents_per_kWh": 9.91
+  },
+  {
+    "state": "MT",
+    "sales_TWh_latest_12mo": 15.2,
+    "sales_TWh_5yr_earlier": 14.9,
+    "growth_pct_5yr": 2.1,
+    "avg_price_cents_per_kWh": 11.41
+  },
+  {
+    "state": "SD",
+    "sales_TWh_latest_12mo": 14.0,
+    "sales_TWh_5yr_earlier": 12.9,
+    "growth_pct_5yr": 8.3,
+    "avg_price_cents_per_kWh": 11.91
+  },
+  {
+    "state": "DE",
+    "sales_TWh_latest_12mo": 11.6,
+    "sales_TWh_5yr_earlier": 11.4,
+    "growth_pct_5yr": 1.7,
+    "avg_price_cents_per_kWh": 14.99
+  },
+  {
+    "state": "NH",
+    "sales_TWh_latest_12mo": 11.2,
+    "sales_TWh_5yr_earlier": 10.8,
+    "growth_pct_5yr": 3.8,
+    "avg_price_cents_per_kWh": 23.07
+  },
+  {
+    "state": "ME",
+    "sales_TWh_latest_12mo": 11.1,
+    "sales_TWh_5yr_earlier": 11.5,
+    "growth_pct_5yr": -3.7,
+    "avg_price_cents_per_kWh": 23.96
+  },
+  {
+    "state": "DC",
+    "sales_TWh_latest_12mo": 10.1,
+    "sales_TWh_5yr_earlier": 9.9,
+    "growth_pct_5yr": 2.2,
+    "avg_price_cents_per_kWh": 22.56
+  },
+  {
+    "state": "HI",
+    "sales_TWh_latest_12mo": 9.1,
+    "sales_TWh_5yr_earlier": 8.9,
+    "growth_pct_5yr": 2.8,
+    "avg_price_cents_per_kWh": 38.9
+  },
+  {
+    "state": "RI",
+    "sales_TWh_latest_12mo": 7.4,
+    "sales_TWh_5yr_earlier": 7.4,
+    "growth_pct_5yr": 1.0,
+    "avg_price_cents_per_kWh": 25.8
+  },
+  {
+    "state": "AK",
+    "sales_TWh_latest_12mo": 6.3,
+    "sales_TWh_5yr_earlier": 5.9,
+    "growth_pct_5yr": 6.6,
+    "avg_price_cents_per_kWh": 24.02
+  },
+  {
+    "state": "VT",
+    "sales_TWh_latest_12mo": 5.5,
+    "sales_TWh_5yr_earlier": 5.4,
+    "growth_pct_5yr": 2.0,
+    "avg_price_cents_per_kWh": 20.12
+  }
+]
