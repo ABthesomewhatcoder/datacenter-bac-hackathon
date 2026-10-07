@@ -95,7 +95,8 @@ export default function SiteScoreCard({
     return (
       <div className="score-card score-card--pending">
         <div className="panel__subheading">
-          Sustainable Site Score <span className="tag tag--real">Real data only</span>
+          Exact-site sustainability screening{' '}
+          <span className="tag tag--real">Real data only</span>
         </div>
         <p className="panel__placeholder">Evaluating site evidence…</p>
       </div>
@@ -162,7 +163,8 @@ export default function SiteScoreCard({
   return (
     <div className="score-card">
       <div className="panel__subheading">
-        Sustainable Site Score <span className="tag tag--real">Real data only</span>
+        Exact-site sustainability screening{' '}
+        <span className="tag tag--real">Real data only</span>
       </div>
 
       <div className="segmented score-card__profiles" role="group" aria-label="Priority profile">
@@ -204,11 +206,11 @@ export default function SiteScoreCard({
           ))}
           <div className="site-facts">
             <div className="site-fact">
-              <span>Feasibility</span>
-              <span className="mono score-card__fail">FAIL</span>
+              <span>Screening constraints</span>
+              <span className="score-card__fail">Fail</span>
             </div>
             <div className="site-fact">
-              <span>Evidence Confidence</span>
+              <span>Evidence confidence</span>
               <span>{result.confidencePct}%</span>
             </div>
           </div>
@@ -219,7 +221,7 @@ export default function SiteScoreCard({
             {result.overall ?? '—'}
             <span className="score-card__denom"> / 100</span>
             <span className="score-card__class">
-              {result.classification?.toUpperCase()}
+              {result.classification}
             </span>
           </div>
           {result.classificationCapped && (
@@ -230,12 +232,16 @@ export default function SiteScoreCard({
           )}
           <div className="site-facts">
             <div className="site-fact">
-              <span>Evidence Confidence</span>
+              <span
+                title="Confidence reflects completeness, resolution and reliability of the supporting evidence. It is separate from the suitability score."
+              >
+                Evidence confidence
+              </span>
               <span>{result.confidencePct}%</span>
             </div>
             <div className="site-fact">
-              <span>Feasibility</span>
-              <span className="mono score-card__pass">PASS</span>
+              <span>Screening constraints</span>
+              <span className="score-card__pass">Pass</span>
             </div>
           </div>
 
@@ -316,12 +322,29 @@ export default function SiteScoreCard({
           </span>
         </div>
       </div>
-      <p className="sim-note">
-        Screening score from real evidence only — mock demo scores never
-        enter it. Actual deliverable capacity requires utility /
-        interconnection study; Aqueduct does not prove water availability;
-        centroid proximity does not establish moratorium applicability.
-      </p>
+      <details className="disclosure">
+        <summary>How scoring works</summary>
+        <div className="disclosure__body">
+          <ol>
+            <li>Real-world evidence is normalized into 0–100 utility scores.</li>
+            <li>Scores are grouped into Power, Carbon, Water, Physical and Regulatory pillars.</li>
+            <li>Decision-strategy weights define the importance of each pillar.</li>
+            <li>A weighted geometric mean combines the pillars so a severe weakness cannot be completely averaged away.</li>
+            <li>Exact-coordinate screening adds FEMA, land-cover and hard exclusions.</li>
+          </ol>
+        </div>
+      </details>
+      <details className="disclosure">
+        <summary>About this screening</summary>
+        <div className="disclosure__body">
+          This tool supports early-stage site screening. Parcel acreage,
+          ownership, zoning, fiber availability, permitting, geotechnical
+          conditions and utility interconnection require additional due
+          diligence. Aqueduct does not prove water availability; centroid
+          proximity does not establish moratorium applicability; mock demo
+          scores never enter this screening.
+        </div>
+      </details>
     </div>
   )
 }

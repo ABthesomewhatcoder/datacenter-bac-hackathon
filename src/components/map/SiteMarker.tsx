@@ -21,7 +21,7 @@ export default function SiteMarker() {
         <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
           {/* dark halo for contrast over bright satellite imagery */}
           <circle cx="28" cy="28" r="15" stroke="rgba(6, 10, 14, 0.65)" strokeWidth="5" />
-          <circle cx="28" cy="28" r="15" stroke="#35c2c9" strokeWidth="2" />
+          <circle cx="28" cy="28" r="15" stroke="#4355B9" strokeWidth="2" />
           {/* crosshair ticks */}
           <g stroke="rgba(6, 10, 14, 0.65)" strokeWidth="5" strokeLinecap="round">
             <line x1="28" y1="3" x2="28" y2="12" />
@@ -29,7 +29,7 @@ export default function SiteMarker() {
             <line x1="3" y1="28" x2="12" y2="28" />
             <line x1="44" y1="28" x2="53" y2="28" />
           </g>
-          <g stroke="#35c2c9" strokeWidth="2" strokeLinecap="round">
+          <g stroke="#4355B9" strokeWidth="2" strokeLinecap="round">
             <line x1="28" y1="3" x2="28" y2="12" />
             <line x1="28" y1="44" x2="28" y2="53" />
             <line x1="3" y1="28" x2="12" y2="28" />
@@ -37,7 +37,7 @@ export default function SiteMarker() {
           </g>
           {/* center dot */}
           <circle cx="28" cy="28" r="4" fill="rgba(6, 10, 14, 0.65)" />
-          <circle cx="28" cy="28" r="2.4" fill="#35c2c9" />
+          <circle cx="28" cy="28" r="2.4" fill="#4355B9" />
         </svg>
       </div>
     </Marker>

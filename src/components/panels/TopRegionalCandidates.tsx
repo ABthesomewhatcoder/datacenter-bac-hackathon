@@ -49,9 +49,10 @@ export default function TopRegionalCandidates() {
   if (!top || !evidenceByFips) {
     return (
       <div className="regional-panel">
-        <h3 className="panel__subheading">
-          Nationwide Screening <span className="tag tag--real">Real data</span>
-        </h3>
+        <h3 className="panel__heading">National screening</h3>
+        <p className="panel__intro">
+          Rank U.S. regions for the selected facility.
+        </p>
         <p className="panel__placeholder">Loading regional evidence…</p>
       </div>
     )
@@ -115,43 +116,57 @@ export default function TopRegionalCandidates() {
 
   return (
     <div className="regional-panel">
-      <h3 className="panel__subheading">
-        Nationwide Screening <span className="tag tag--real">Real data</span>
+      <h3 className="panel__heading">
+        National screening <span className="tag tag--real">Real data</span>
       </h3>
+      <p className="panel__intro">
+        Rank U.S. regions for the selected facility —{' '}
+        {inputs.itLoadMW} MW IT · PUE {inputs.pue.toFixed(2)} ·{' '}
+        {PRIORITY_PROFILES[priorityProfile].label}.
+      </p>
       <div className="site-facts">
         <div className="site-fact">
           <span>Counties evaluated</span>
           <span>{evaluated.toLocaleString('en-US')}</span>
         </div>
         <div className="site-fact">
-          <span>Meet evidence requirements</span>
-          <span>
-            {eligible.toLocaleString('en-US')} of{' '}
-            {evaluated.toLocaleString('en-US')}
+          <span
+            title="Counties missing carbon, water, transmission or state grid evidence — or under 65% evidence confidence — keep their score on the map but are not nationally ranked."
+          >
+            Recommendation-eligible ⓘ
           </span>
-        </div>
-        <div className="site-fact">
-          <span>Facility</span>
-          <span>
-            {inputs.itLoadMW} MW IT · PUE {inputs.pue.toFixed(2)}
-          </span>
-        </div>
-        <div className="site-fact">
-          <span>Priority profile</span>
-          <span>{PRIORITY_PROFILES[priorityProfile].label}</span>
+          <span>{eligible.toLocaleString('en-US')}</span>
         </div>
       </div>
 
-      <h3 className="panel__subheading panel__subheading--minor">
-        Top Regional Candidates
-      </h3>
+      <h3 className="panel__subheading">Top regional candidates</h3>
       <div className="regional-list">{top.map(renderRow)}</div>
 
       <p className="sim-note">
-        {REGIONAL_DATASET.caveat} {REGIONAL_DATASET.representativePointCaveat}{' '}
-        Click a county to zoom in and place an exact candidate site for P1
-        validation.
+        Click a county to zoom in and place an exact candidate site for
+        coordinate-level screening.
       </p>
+      <details className="disclosure">
+        <summary>About regional scores</summary>
+        <div className="disclosure__body">
+          {REGIONAL_DATASET.caveat}{' '}
+          {REGIONAL_DATASET.representativePointCaveat} This tool supports
+          early-stage site screening; parcel acreage, ownership, zoning,
+          fiber availability, permitting, geotechnical conditions and
+          utility interconnection require additional due diligence.
+        </div>
+      </details>
+      <details className="disclosure">
+        <summary>Data &amp; methodology</summary>
+        <div className="disclosure__body">
+          Evidence: EPA eGRID2023 · WRI Aqueduct 4.0 · HIFLD transmission ·
+          NERC 2026 SRA · state generation/demand data · Moratorium Nation
+          2026 (CC BY 4.0). Scores use the same utilities and weighted
+          geometric mean as exact-site screening, with the physical pillar
+          reserved for coordinate-level evidence. Full source links are in
+          the project README.
+        </div>
+      </details>
     </div>
   )
 }

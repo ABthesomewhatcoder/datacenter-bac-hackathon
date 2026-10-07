@@ -21,7 +21,6 @@ import {
 import FacilitySimulator from './FacilitySimulator'
 import PowerGridContext from './PowerGridContext'
 import RegulatoryContext from './RegulatoryContext'
-import ProjectConfiguration from './ProjectConfiguration'
 import SiteScoreCard from './SiteScoreCard'
 import TopRegionalCandidates from './TopRegionalCandidates'
 import {
@@ -227,9 +226,8 @@ export default function SiteAnalysisPanel() {
   }
 
   return (
-    <aside className="panel panel--right" aria-label="Site analysis">
+    <aside className="panel panel--right" aria-label="Analysis">
       <section className="panel__section">
-        <h2 className="panel__heading">Site Analysis</h2>
 
         {showSite && selectedSite ? (
           <div className="state-report">
@@ -809,7 +807,6 @@ export default function SiteAnalysisPanel() {
           </div>
         ) : (
           <>
-            <ProjectConfiguration />
             <TopRegionalCandidates />
             <div className="empty-state empty-state--compact">
               <p className="empty-state__hint">

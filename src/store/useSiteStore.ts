@@ -89,8 +89,8 @@ export const BASEMAPS: Record<BasemapId, BasemapOption> = {
   },
   clean: {
     id: 'clean',
-    label: 'Clean Map',
-    styleUrl: 'mapbox://styles/mapbox/dark-v11',
+    label: 'Map',
+    styleUrl: 'mapbox://styles/mapbox/light-v11',
   },
 }
 
@@ -288,7 +288,7 @@ const overlayCountyOverall = (
 })
 
 export const useSiteStore = create<SiteStore>((set, get) => ({
-  basemap: 'satellite',
+  basemap: 'clean',
   setBasemap: (basemap) => set({ basemap }),
 
   viewState: INITIAL_VIEW_STATE,

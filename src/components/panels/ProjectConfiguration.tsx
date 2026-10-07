@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import {
   PRIORITY_PROFILES,
   type PriorityProfileId,
@@ -16,14 +17,22 @@ const PROFILE_ORDER: PriorityProfileId[] = [
   'deployment',
 ]
 
+const PROFILE_SHORT: Record<PriorityProfileId, string> = {
+  balanced: 'Balanced',
+  sustainability: 'Sustainability first',
+  deployment: 'Deployment first',
+}
+
 function Segmented<T extends number | string>({
   label,
+  helper,
   options,
   value,
   format,
   onSelect,
 }: {
   label: string
+  helper?: string
   options: T[]
   value: T
   format: (v: T) => string
@@ -45,15 +54,21 @@ function Segmented<T extends number | string>({
           </button>
         ))}
       </div>
+      {helper && <div className="sim-input__helper">{helper}</div>}
     </div>
   )
 }
 
+const fmt = (n: number, digits = 0) =>
+  n.toLocaleString('en-US', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  })
+
 /**
- * PROJECT CONFIGURATION — the same shared facility + decision-profile
- * state that drives P1 and P2 (no duplicate state). Changing anything
- * here recomputes the nationwide rankings through the existing store
- * pipeline (store setters call recomputeRegional).
+ * Project configuration — the assumptions zone. Drives the same shared
+ * store state used by P1 and P2 (no duplicate state); any change here
+ * recomputes rankings through the existing store pipeline.
  */
 export default function ProjectConfiguration() {
   const inputs = useSiteStore((s) => s.simulationInputs)
@@ -63,6 +78,19 @@ export default function ProjectConfiguration() {
   const priorityProfile = useSiteStore((s) => s.priorityProfile)
   const setPriorityProfile = useSiteStore((s) => s.setPriorityProfile)
 
+  // Subtle, transient "recalculated" note — no toast spam.
+  const [recalcNote, setRecalcNote] = useState(false)
+  const firstRender = useRef(true)
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false
+      return
+    }
+    setRecalcNote(true)
+    const t = setTimeout(() => setRecalcNote(false), 2200)
+    return () => clearTimeout(t)
+  }, [inputs, planningHorizonYears, priorityProfile])
+
   const sim = simulateFacility(inputs, null)
   const wueOptions = WUE_PRESETS.map((w) => w.value).includes(inputs.wueLPerKwh)
     ? WUE_PRESETS.map((w) => w.value)
@@ -70,67 +98,84 @@ export default function ProjectConfiguration() {
 
   return (
     <div className="project-config">
-      <h3 className="panel__subheading">
-        Project Configuration <span className="tag tag--scenario">Scenario</span>
-      </h3>
+      <h2 className="panel__heading">Project configuration</h2>
+      <p className="panel__intro">Configure the facility you want to site.</p>
 
       <Segmented
-        label="IT Capacity (MW)"
+        label="Facility size"
         options={IT_CAPACITY_PRESETS_MW}
         value={inputs.itLoadMW}
-        format={(v) => `${v}`}
+        format={(v) => `${v} MW`}
         onSelect={(v) => setInputs({ itLoadMW: v })}
       />
       <Segmented
         label="PUE"
+        helper="Power Usage Effectiveness"
         options={PUE_PRESETS}
         value={inputs.pue}
         format={(v) => v.toFixed(2)}
         onSelect={(v) => setInputs({ pue: v })}
       />
       <Segmented
-        label="Planning Horizon"
-        options={[20, 30] as const}
-        value={planningHorizonYears}
-        format={(v) => `${v} yr`}
-        onSelect={setPlanningHorizonYears}
-      />
-      <Segmented
-        label="Decision Profile"
-        options={PROFILE_ORDER}
-        value={priorityProfile}
-        format={(v) =>
-          PRIORITY_PROFILES[v].label
-            .replace(' Sustainable', '')
-            .replace(' First', '')
-        }
-        onSelect={setPriorityProfile}
-      />
-      <Segmented
-        label="WUE (L/kWh)"
+        label="WUE"
+        helper="Water Usage Effectiveness · affects water simulation, not rankings"
         options={wueOptions}
         value={inputs.wueLPerKwh}
         format={(v) => v.toFixed(2)}
         onSelect={(v) => setInputs({ wueLPerKwh: v })}
       />
-      <p className="sim-note">
-        WUE affects the facility water simulation; it is not used to alter
-        regional suitability because basin supply capacity is not
-        available.
-      </p>
-
-      <div className="site-facts">
-        <div className="site-fact">
-          <span>Facility Load</span>
-          <span>{Math.round(sim.facilityLoadMW)} MW</span>
-        </div>
-        <div className="site-fact">
-          <span>Annual Electricity</span>
-          <span>{sim.facilityEnergyTWh.toFixed(3)} TWh</span>
+      <Segmented
+        label="Planning horizon"
+        options={[20, 30] as const}
+        value={planningHorizonYears}
+        format={(v) => `${v} years`}
+        onSelect={setPlanningHorizonYears}
+      />
+      <div className="project-config__row">
+        <div className="sim-input__label">Decision strategy</div>
+        <div className="segmented segmented--stack" role="group" aria-label="Decision strategy">
+          {PROFILE_ORDER.map((id) => (
+            <button
+              key={id}
+              type="button"
+              className={`segmented__option${priorityProfile === id ? ' segmented__option--active' : ''}`}
+              aria-pressed={priorityProfile === id}
+              onClick={() => setPriorityProfile(id)}
+              title={PRIORITY_PROFILES[id].label}
+            >
+              {PROFILE_SHORT[id]}
+            </button>
+          ))}
         </div>
       </div>
-      <p className="sim-note project-config__hint">
-        Rankings update for this project configuration.
+
+      <h3 className="panel__subheading">Facility requirements</h3>
+      <div className="site-facts">
+        <div className="site-fact">
+          <span>Total facility load</span>
+          <span>{fmt(sim.facilityLoadMW)} MW</span>
+        </div>
+        <div className="site-fact">
+          <span>Annual electricity</span>
+          <span>{sim.facilityEnergyTWh.toFixed(3)} TWh</span>
+        </div>
+        <div className="site-fact">
+          <span>Cooling water</span>
+          <span>{fmt(sim.annualWaterMillionLiters, 1)}M L/year</span>
+        </div>
+        <div className="site-fact">
+          <span>Operational carbon</span>
+          <span>Depends on site grid</span>
+        </div>
+      </div>
+      <p
+        className="sim-note project-config__hint"
+        role="status"
+        style={{ minHeight: '1.2em' }}
+      >
+        {recalcNote
+          ? `Rankings recalculated for ${inputs.itLoadMW} MW · ${PROFILE_SHORT[priorityProfile]}`
+          : 'Rankings update for this configuration.'}
       </p>
     </div>
   )

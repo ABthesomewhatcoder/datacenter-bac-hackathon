@@ -26,6 +26,7 @@ import EgridLayer from './EgridLayer'
 import RegulatoryLayer, { REGULATORY_MARKER_LAYER_ID } from './RegulatoryLayer'
 import WaterStressLayer from './WaterStressLayer'
 import FloodDebug from './FloodDebug'
+import LayersControl from './LayersControl'
 import AnalysisRadius from './AnalysisRadius'
 import MapTooltip, { scoreRows, type TooltipInfo } from './MapTooltip'
 
@@ -517,6 +518,7 @@ export default function SiteMap() {
         onCounty={navigateToCounty}
         onLocal={navigateToLocal}
       />
+      <LayersControl />
       {siteActive && !selectedSite && (
         <div className="site-instruction" role="status">
           <span className="site-instruction__glyph" aria-hidden="true">

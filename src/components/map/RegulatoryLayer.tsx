@@ -237,7 +237,7 @@ export default function RegulatoryLayer() {
               'circle-color': STATUS_COLOR,
               'circle-radius': STATUS_RADIUS,
               'circle-opacity': STATUS_OPACITY,
-              'circle-stroke-color': 'rgba(240, 246, 252, 0.7)',
+              'circle-stroke-color': 'rgba(255, 255, 255, 0.85)',
               'circle-stroke-width': [
                 'match',
                 ['get', 'enactedStatus'],
