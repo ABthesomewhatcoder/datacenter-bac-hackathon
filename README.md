@@ -9,6 +9,30 @@ proximity — then simulate a hypothetical AI data center at that location.
 Built with React 19, TypeScript, Vite, Mapbox GL (via react-map-gl),
 deck.gl, Zustand, and Turf.
 
+## Screenshots
+
+**Nationwide screening** — 3,109 CONUS counties scored on real evidence
+for the configured facility; Whatcom County, WA leads the Top Regional
+Candidates:
+
+![Nationwide screening with Top Regional Candidates](docs/screenshots/nationwide-screening.jpg)
+
+**Exact-site validation** — a candidate pin on the Custer/I-5 corridor in
+Whatcom County scores 88/100 STRONG from real evidence only:
+
+![Sustainable Site Score 88/100 at the Custer/I-5 candidate site](docs/screenshots/whatcom-site-score.jpg)
+
+**Deterministic explanations** — every score comes with its evidence
+(500 kV line 0.3 mi away, +16.9pp NERC headroom, Zone X flood, zero
+nearby moratoria) and facility impact figures:
+
+![Why-it-ranks-well evidence and facility impact](docs/screenshots/site-evidence.jpg)
+
+**Regulatory intelligence** — Moratorium Nation 2026 jurisdiction markers
+over Ohio, one of the most moratorium-dense states:
+
+![Data-center moratorium activity layer over Ohio](docs/screenshots/regulatory-layer.jpg)
+
 ## Features
 
 - **Progressive map disclosure** — nationwide state choropleth → county
