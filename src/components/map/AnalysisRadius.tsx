@@ -29,7 +29,7 @@ export default function AnalysisRadius() {
         id="analysis-radius-fill"
         type="fill"
         paint={{
-          'fill-color': '#4355B9',
+          'fill-color': '#d38a3a',
           'fill-opacity': 0.06,
         }}
       />
@@ -37,7 +37,7 @@ export default function AnalysisRadius() {
         id="analysis-radius-line"
         type="line"
         paint={{
-          'line-color': '#4355B9',
+          'line-color': '#e8edf2',
           'line-width': 1.6,
           'line-dasharray': [3, 2],
           'line-opacity': 0.9,

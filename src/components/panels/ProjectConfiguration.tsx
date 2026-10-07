@@ -98,11 +98,11 @@ export default function ProjectConfiguration() {
 
   return (
     <div className="project-config">
-      <h2 className="panel__heading">Project configuration</h2>
-      <p className="panel__intro">Configure the facility you want to site.</p>
+      <h2 className="panel__heading">Facility profile</h2>
+      <p className="panel__intro">Configure the infrastructure being evaluated.</p>
 
       <Segmented
-        label="Facility size"
+        label="IT capacity"
         options={IT_CAPACITY_PRESETS_MW}
         value={inputs.itLoadMW}
         format={(v) => `${v} MW`}

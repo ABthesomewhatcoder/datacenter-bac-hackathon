@@ -73,7 +73,7 @@ export default function TopRegionalCandidates() {
           onClick={() => focusCounty(s.state, s.fips)}
           title="Zoom to county and place an exact candidate site"
         >
-          <span className="regional-row__rank">{i + 1}.</span>
+          <span className="regional-row__rank mono">{String(i + 1).padStart(2, '0')}</span>
           <span className="regional-row__name">
             {s.name}, {s.state}
           </span>

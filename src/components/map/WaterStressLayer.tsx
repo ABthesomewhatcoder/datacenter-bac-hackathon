@@ -50,7 +50,7 @@ export default function WaterStressLayer() {
         id="aqueduct-border"
         type="line"
         paint={{
-          'line-color': 'rgba(95, 99, 104, 0.35)',
+          'line-color': 'rgba(222, 230, 238, 0.3)',
           'line-width': 0.7,
         }}
       />

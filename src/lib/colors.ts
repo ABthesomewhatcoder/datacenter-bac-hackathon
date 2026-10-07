@@ -2,20 +2,22 @@ import type { ExpressionSpecification } from 'mapbox-gl'
 import type { Metric } from './scoring.ts'
 
 /**
- * Score → color ramp: restrained single-hue indigo (light = low,
- * deep = high) per the product design system — status is never encoded
- * as red/green on the analytical choropleth. Single source of truth for
- * both the Mapbox layer expression and any DOM UI (bars, legend).
+ * Suitability ramp — analytical red → orange → amber → yellow-green →
+ * green. Muted so it reads over satellite imagery without going neon.
+ * Green = stronger candidate, red = weaker candidate; missing evidence
+ * is NEVER red (see NO_DATA_COLOR: neutral gray = "cannot evaluate").
+ * Single source of truth for the Mapbox expression and DOM UI.
  */
 export const SCORE_STOPS: Array<[number, string]> = [
-  [30, '#E4E7F3'],
-  [50, '#BDC5E7'],
-  [65, '#929ED6'],
-  [80, '#5D6DC4'],
-  [95, '#34459F'],
+  [35, '#9e4b42'],
+  [50, '#c07a3c'],
+  [65, '#c9a83e'],
+  [78, '#9bae4c'],
+  [88, '#5f9e5f'],
+  [96, '#3f8e58'],
 ]
 
-export const NO_DATA_COLOR = '#D5D8DD'
+export const NO_DATA_COLOR = '#596069'
 
 function hexToRgb(hex: string): [number, number, number] {
   const n = parseInt(hex.slice(1), 16)

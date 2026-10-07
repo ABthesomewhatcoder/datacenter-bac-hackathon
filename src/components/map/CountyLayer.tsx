@@ -69,7 +69,7 @@ export default function CountyLayer() {
         type="line"
         minzoom={COUNTY_MIN_RENDER_ZOOM}
         paint={{
-          'line-color': 'rgba(95, 99, 104, 0.45)',
+          'line-color': 'rgba(222, 230, 238, 0.38)',
           'line-width': [
             'case',
             ['boolean', ['feature-state', 'hover'], false],
@@ -93,7 +93,7 @@ export default function CountyLayer() {
         minzoom={COUNTY_MIN_RENDER_ZOOM}
         filter={['==', ['get', 'geoid'], selectedCountyId ?? '']}
         paint={{
-          'line-color': '#4355B9',
+          'line-color': '#e8edf2',
           'line-width': 2.5,
         }}
       />

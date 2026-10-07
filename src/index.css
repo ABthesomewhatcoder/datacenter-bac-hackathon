@@ -7,21 +7,23 @@
  */
 
 :root {
-  /* color tokens */
-  --bg: #f6f7f9;
-  --surface: #ffffff;
-  --surface-secondary: #f1f3f5;
-  --text-primary: #202124;
-  --text-secondary: #5f6368;
-  --text-muted: #89919b;
-  --border: #dadce0;
-  --brand: #4355b9;
-  --brand-hover: #34459f;
-  --brand-subtle: #eef0ff;
-  --accent: #e58a32;
-  --success: #3e7c61;
-  --warning: #b7791f;
-  --danger: #b84b4b;
+  /* color tokens — dark operational palette */
+  --bg: #0d1117;
+  --surface: #141920;
+  --surface-secondary: #1a2028;
+  --surface-elevated: #202731;
+  --text-primary: #f1f3f5;
+  --text-secondary: #a0a8b3;
+  --text-muted: #707985;
+  --border: #2b333d;
+  --border-subtle: #242b34;
+  --brand: #507ba7;
+  --brand-hover: #618cb8;
+  --brand-subtle: #1a2b3b;
+  --accent: #d38a3a;
+  --success: #548c70;
+  --warning: #c28a42;
+  --danger: #bb5a5a;
 
   /* legacy aliases still referenced in a few places */
   --text: var(--text-primary);
@@ -29,8 +31,8 @@
   /* shape + elevation */
   --radius-control: 6px;
   --radius-panel: 8px;
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.08);
-  --shadow-2: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.25);
 
   /* layout */
   --header-h: 54px;
@@ -230,16 +232,20 @@ body {
 
 .panel__heading {
   margin: 0 0 10px;
-  font-size: 15px;
+  font-size: 11px;
   font-weight: 600;
-  color: var(--text-primary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
 .panel__subheading {
   margin: 16px 0 8px;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
-  color: var(--text-primary);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
 .panel__subheading--minor {
@@ -452,6 +458,7 @@ body {
   text-align: right;
   color: var(--text-primary);
   font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- Tags / chips ---------- */
@@ -470,14 +477,14 @@ body {
 
 .tag--scenario {
   color: var(--warning);
-  border: 1px solid #ecdcc0;
-  background: #fdf8ef;
+  border: 1px solid rgba(194, 138, 66, 0.4);
+  background: rgba(194, 138, 66, 0.1);
 }
 
 .tag--real {
   color: var(--success);
-  border: 1px solid #cfe0d8;
-  background: #f2f8f5;
+  border: 1px solid rgba(84, 140, 112, 0.4);
+  background: rgba(84, 140, 112, 0.12);
 }
 
 /* ---------- Metric bars (demo navigation scores) ---------- */
@@ -819,8 +826,8 @@ body {
 }
 
 .mapboxgl-ctrl-scale {
-  background: rgba(255, 255, 255, 0.8) !important;
-  border-color: var(--text-secondary) !important;
+  background: rgba(13, 17, 23, 0.7) !important;
+  border-color: var(--text-muted) !important;
   color: var(--text-secondary) !important;
   font-size: 10px !important;
 }

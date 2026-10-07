@@ -288,7 +288,7 @@ const overlayCountyOverall = (
 })
 
 export const useSiteStore = create<SiteStore>((set, get) => ({
-  basemap: 'clean',
+  basemap: 'satellite',
   setBasemap: (basemap) => set({ basemap }),
 
   viewState: INITIAL_VIEW_STATE,

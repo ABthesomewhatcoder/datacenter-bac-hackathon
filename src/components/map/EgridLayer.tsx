@@ -50,7 +50,7 @@ export default function EgridLayer() {
         id="egrid-border"
         type="line"
         paint={{
-          'line-color': 'rgba(95, 99, 104, 0.5)',
+          'line-color': 'rgba(222, 230, 238, 0.4)',
           'line-width': 1,
         }}
       />

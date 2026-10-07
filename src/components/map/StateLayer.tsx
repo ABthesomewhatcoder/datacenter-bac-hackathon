@@ -54,7 +54,7 @@ export default function StateLayer() {
         id="state-border"
         type="line"
         paint={{
-          'line-color': 'rgba(95, 99, 104, 0.55)',
+          'line-color': 'rgba(222, 230, 238, 0.5)',
           'line-width': [
             'case',
             ['boolean', ['feature-state', 'hover'], false],
@@ -68,7 +68,7 @@ export default function StateLayer() {
         type="line"
         filter={['==', ['get', 'id'], selectedStateId ?? '']}
         paint={{
-          'line-color': '#4355B9',
+          'line-color': '#e8edf2',
           'line-width': 2.5,
         }}
       />

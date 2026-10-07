@@ -66,13 +66,14 @@ export default function ControlPanel() {
             style={{ background: legendGradient() }}
           />
           <div className="legend__labels">
-            <span>{SCORE_STOPS[0][0]} · Lower</span>
-            <span>Higher · {SCORE_STOPS[SCORE_STOPS.length - 1][0]}</span>
+            <span>{SCORE_STOPS[0][0]} · Weaker</span>
+            <span>Stronger · {SCORE_STOPS[SCORE_STOPS.length - 1][0]}</span>
           </div>
         </div>
         <p className="panel__placeholder">
           Map shading reflects the real Regional Opportunity Score for the
-          configured facility.
+          configured facility. Gray = insufficient evidence, not a low
+          score.
         </p>
         {stateDataError && (
           <p className="panel__error">

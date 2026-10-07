@@ -17,6 +17,15 @@ const PROFILE_ORDER: PriorityProfileId[] = [
   'deployment',
 ]
 
+/** Status color for the classification label only — never whole panels. */
+const BAND_COLORS: Record<string, string> = {
+  Exceptional: '#4e9e66',
+  Strong: '#548c70',
+  Promising: '#9bae4c',
+  'Significant Tradeoffs': '#c28a42',
+  Weak: '#bb5a5a',
+}
+
 const fmt = (n: number, digits = 0) =>
   n.toLocaleString('en-US', {
     minimumFractionDigits: digits,
@@ -220,7 +229,12 @@ export default function SiteScoreCard({
           <div className="score-card__headline">
             {result.overall ?? '—'}
             <span className="score-card__denom"> / 100</span>
-            <span className="score-card__class">
+            <span
+              className="score-card__class"
+              style={{
+                color: BAND_COLORS[result.classification ?? ''] ?? undefined,
+              }}
+            >
               {result.classification}
             </span>
           </div>
