@@ -35,6 +35,23 @@ const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN
 /** fitBounds padding that keeps the zoomed area clear of the UI panels. */
 const FIT_PADDING = { top: 96, bottom: 64, left: 330, right: 370 }
 
+/**
+ * Animated camera transitions (easeTo/fitBounds/flyTo) can be silently
+ * dropped under the controlled viewState setup, so all programmatic
+ * zooms compute the target with cameraForBounds and apply it with
+ * jumpTo — instant and reliable.
+ */
+function jumpToBounds(
+  map: MapRef,
+  bounds: [[number, number], [number, number]],
+  maxZoom?: number,
+) {
+  const cam = map
+    .getMap()
+    .cameraForBounds(bounds, { padding: FIT_PADDING, maxZoom })
+  if (cam) map.getMap().jumpTo(cam)
+}
+
 function MissingTokenNotice() {
   return (
     <div className="map-token-notice">
@@ -117,11 +134,7 @@ export default function SiteMap() {
     )
     if (feature && mapRef.current) {
       setSelectedCountyId(focusCountyFips)
-      mapRef.current.fitBounds(featureBounds(feature), {
-        padding: FIT_PADDING,
-        duration: 1400,
-        maxZoom: 9.5,
-      })
+      jumpToBounds(mapRef.current, featureBounds(feature), 9.5)
       clearFocusCounty()
     }
   }, [focusCountyFips, scoredCounties, setSelectedCountyId, clearFocusCounty])
@@ -253,7 +266,11 @@ export default function SiteMap() {
         x: evt.point.x,
         y: evt.point.y,
         title: props.name,
-        rows: scoreRows(score, regionalStateMedians[props.id] ?? null),
+        rows: scoreRows(
+          score,
+          regionalStateMedians[props.id] ?? null,
+          'Median county score · REAL',
+        ),
       })
     },
     [
@@ -280,11 +297,7 @@ export default function SiteMap() {
     (id: string) => {
       const feature = statesGeo?.features.find((f) => f.properties.id === id)
       if (feature && mapRef.current) {
-        mapRef.current.fitBounds(featureBounds(feature), {
-          padding: FIT_PADDING,
-          duration: 1400,
-          maxZoom: 7.4,
-        })
+        jumpToBounds(mapRef.current, featureBounds(feature), 7.4)
       }
     },
     [statesGeo],
@@ -295,11 +308,7 @@ export default function SiteMap() {
       .getState()
       .scoredCounties?.features.find((f) => f.properties.geoid === geoid)
     if (feature && mapRef.current) {
-      mapRef.current.fitBounds(featureBounds(feature), {
-        padding: FIT_PADDING,
-        duration: 1200,
-        maxZoom: 9.5,
-      })
+      jumpToBounds(mapRef.current, featureBounds(feature), 9.5)
     }
   }, [])
 
@@ -435,10 +444,9 @@ export default function SiteMap() {
     clearSelectedSite()
     setHover(null)
     setTooltip(null)
-    mapRef.current?.flyTo({
+    mapRef.current?.getMap().jumpTo({
       center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
       zoom: INITIAL_VIEW_STATE.zoom,
-      duration: 1400,
     })
   }, [setSelectedStateId, clearSelectedSite, setHover])
 

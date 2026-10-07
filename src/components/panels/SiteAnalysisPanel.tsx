@@ -296,8 +296,8 @@ export default function SiteAnalysisPanel() {
             />
 
             <div>
-              <div className="panel__subheading">Analysis Radius</div>
-              <div className="segmented" role="group" aria-label="Analysis radius">
+              <div className="panel__subheading">Reference radius</div>
+              <div className="segmented" role="group" aria-label="Reference radius">
                 {RADIUS_OPTIONS_MILES.map((miles) => (
                   <button
                     key={miles}
@@ -310,6 +310,10 @@ export default function SiteAnalysisPanel() {
                   </button>
                 ))}
               </div>
+              <p className="state-report__hint">
+                Draws a distance ring around the candidate and zooms to fit
+                it — visual context only; it does not change any score.
+              </p>
             </div>
 
             <div>
@@ -751,6 +755,21 @@ export default function SiteAnalysisPanel() {
                           (s) => s.fips === selectedCountyId,
                         ) ?? null)
                       : null
+                  const bestInState =
+                    !showCounty && selectedStateId && regionalScores
+                      ? regionalScores
+                          .filter(
+                            (s) =>
+                              s.state === selectedStateId && s.score !== null,
+                          )
+                          .reduce<(typeof regionalScores)[number] | null>(
+                            (best, s) =>
+                              !best || (s.score as number) > (best.score as number)
+                                ? s
+                                : best,
+                            null,
+                          )
+                      : null
                   return real !== null ? (
                     <>
                       <div className="site-facts">
@@ -758,12 +777,28 @@ export default function SiteAnalysisPanel() {
                           <span>
                             {showCounty
                               ? 'Regional Opportunity'
-                              : 'State Regional Screening Summary'}{' '}
+                              : 'Median county opportunity'}{' '}
                             <span className="tag tag--real">Real</span>
                           </span>
                           <span>{Math.round(real)} / 100</span>
                         </div>
+                        {bestInState && (
+                          <div className="site-fact">
+                            <span>Best county</span>
+                            <span>
+                              {bestInState.name} ·{' '}
+                              {Math.round(bestInState.score as number)}
+                            </span>
+                          </div>
+                        )}
                       </div>
+                      {!showCounty && (
+                        <p className="state-report__hint">
+                          State shading shows the median of its county
+                          scores — a state can look weak overall while
+                          containing strong individual counties.
+                        </p>
+                      )}
                       {entry && !entry.rankingEligible && (
                         <p className="regional-ineligible">
                           INSUFFICIENT EVIDENCE FOR NATIONAL RANKING

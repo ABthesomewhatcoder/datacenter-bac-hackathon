@@ -24,10 +24,11 @@ export interface TooltipInfo {
 export function scoreRows(
   score: StateScore | undefined,
   regionalOverall: number | null | undefined,
+  regionalLabel = 'Regional Opportunity · REAL',
 ): TooltipRow[] {
   const rows: Array<[string, number]> = []
   if (regionalOverall !== null && regionalOverall !== undefined) {
-    rows.push(['Regional Opportunity · REAL', Math.round(regionalOverall)])
+    rows.push([regionalLabel, Math.round(regionalOverall)])
   }
   if (score) {
     rows.push(
