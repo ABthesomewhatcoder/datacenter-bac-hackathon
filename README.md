@@ -49,7 +49,7 @@ Every number in the scoring comes from one of these. The old prototype suitabili
 | --- | --- | --- |
 | [HIFLD Electric Power Transmission Lines](https://catalog.data.gov/dataset/electric-power-transmission-lines) | Nearest-line distance and voltage | Proximity does not equal available interconnection capacity |
 | [NERC 2026 Summer Reliability Assessment](https://www.nerc.com/globalassets/our-work/assessments/nerc_sra_2026.pdf) | Reserve margins, seasonal risk | Assessment-area level; 12 states split across areas are reported as unavailable rather than guessed |
-| [EPA eGRID2023 Rev. 2](https://www.epa.gov/egrid/summary-data) | Grid carbon intensity (total output CO2e rate, field SRC2ERTA) | Subregion average, not the serving utility |
+| [EPA eGRID2023 Rev. 2](https://www.epa.gov/egrid/summary-data) | Energy grid carbon intensity (total output CO2e rate, field SRC2ERTA) | Subregion average, not the serving utility |
 | [WRI Aqueduct 4.0](https://www.wri.org/data/aqueduct-global-maps-40-data) | Water stress, baseline/2030/2050 | Basin-level screening; does not measure project-specific available water. CC BY 4.0 |
 | [FEMA National Flood Hazard Layer](https://hazards.fema.gov/) | Flood zones, hard exclusions | Queried live per coordinate; unmapped areas report unknown, not safe |
 | [USGS Annual NLCD 2025](https://www.usgs.gov/data/annual-national-land-cover-database-nlcd-collection-1-products-ver-12-june-2026) | Land cover, hard exclusions | 30 m pixel, queried live; says nothing about ownership or zoning |
